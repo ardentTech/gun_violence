@@ -1,57 +1,20 @@
-module Main exposing (..)
+port module Main exposing (main)
 
 import Html exposing (Html, div)
-import Date exposing (Date)
 
-
-type VictimType = Injured | Killed
-
-
-type alias Filter = {
-  victimTypes : List VictimType,
-  years : List Int  -- @todo limit this to 2014-2017
-}
-
-
-type State = CO | TX
-
-
-type alias Record = {
-  date : Date,
-  injured : Int,
-  killed : Int,
-  state : State
-}
-
-
-type alias Model = {
-  filter : Filter,
-  records : List Record
-}
+import D3
+import Message exposing (Msg)
+import Model exposing (..)
+import Update exposing (update)
+import View exposing (view)
 
 
 init : ( Model, Cmd Msg )
 init = ({
-    filter = { victimTypes = [ Killed ], years = [ 2017 ] },
-    records = []
-  }, Cmd.none )
-
-
---
-
-
-type Msg = NoOp
-
-
--- @todo if updating model.selectedYears only allow 2014-2017
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
-  case msg of
-    _ -> ( model, Cmd.none )
-
-
-view : Model -> Html Msg
-view model = div [] []
+    filter = initialFilter,
+    -- @todo from CSV
+    records = demoRecords
+  }, D3.update demoRecords )
 
 
 main : Program Never Model Msg
