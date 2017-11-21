@@ -3,18 +3,20 @@ module Model exposing (..)
 import Date exposing (Date)
 
 
-type VictimType = Injured | Killed
+type Category = Injured | Killed
 
 
--- D3 payload
--- @todo from API
 type alias Filter = {
-  victimTypes : List VictimType,
+  category : Category,
   years : List Int  -- @todo limit this to 2014-2017
 }
 
 
--- @todo from API
+setCategory : Category -> Filter -> Filter
+setCategory c f = { f | category = c }
+
+
+-- @todo from API?
 type State = GA | LA | MN
 
 
@@ -33,14 +35,18 @@ type alias Model = {
 
 
 initialFilter : Filter
-initialFilter = { victimTypes = [ Killed ], years = [ 2017 ] }
+initialFilter = { category = Killed, years = [ 2017 ] }
 
 
 demoRecords : List Record
 demoRecords =
   let
-    date = case Date.fromString("November 18, 2017") of
+    timestamp s = case Date.fromString(s) of
       Ok d -> d
       Err e -> Date.fromTime 0
   in
-    [ Record date 4 0 MN ]
+    [
+      Record (timestamp "November 18, 2017") 4 0 MN,
+      Record (timestamp "November 17, 2017") 4 0 LA,
+      Record (timestamp "December 31, 2016") 2 2 GA
+    ]

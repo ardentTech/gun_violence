@@ -1,4 +1,5 @@
-module Message exposing (Msg)
+module Message exposing (Msg(..))
 
 
-type Msg = NoOp
+-- @todo instead of String use a Category Type
+type Msg = NoOp | SetCategory String

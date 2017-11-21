@@ -6,6 +6,7 @@ app.ports.newState.subscribe(function(payload) {
     update(payload);
 });
 
+// key == FIPS
 var states = {
     "01": "Alabama",
     "02": "Alaska",
@@ -65,6 +66,7 @@ var svg = d3.select("svg"),
 
 function update(data) {
     console.log("update()");
+    console.log(data);
 }
 
 function render() {
