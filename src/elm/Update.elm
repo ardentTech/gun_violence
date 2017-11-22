@@ -2,7 +2,8 @@ module Update exposing (update)
 
 import D3
 import Message exposing (Msg(..))
-import Model exposing (..)
+import Model exposing (Model)
+import Record exposing (Category(..), setCategory)
 
 
 -- @todo if updating model.selectedYears only allow 2014-2017
@@ -12,7 +13,6 @@ update msg model =
     SetCategory c ->
       let
         filter = setCategory Killed model.filter
-        records = []
       in
-        ({ model | filter = filter, records = records }, D3.update records )
+        ({ model | filter = filter }, D3.update model )
     _ -> ( model, Cmd.none )
