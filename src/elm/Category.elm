@@ -3,6 +3,7 @@ module Category exposing (Category(..), all, fromName, toName)
 import Dict
 
 
+-- @todo Victims Incidents
 type Category = Injured | Killed
 
 

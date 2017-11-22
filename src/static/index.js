@@ -6,59 +6,58 @@ app.ports.newState.subscribe(function(payload) {
     update(payload);
 });
 
-// FIPS : ABBV
 var states = {
-    "01": "AL",
-    "02": "AK",
-    "04": "AZ",
-    "05": "AR",
-    "06": "CA",
-    "08": "CO",
-    "09": "CT",
-    "10": "DE",
-    "10": "DC",
-    "12": "FL",
-    "13": "GA",
-    "15": "HI",
-    "16": "ID",
-    "17": "IL",
-    "18": "IN",
-    "19": "IA",
-    "20": "KS",
-    "21": "KY",
-    "22": "LA",
-    "23": "ME",
-    "24": "MD",
-    "25": "MA",
-    "26": "MI",
-    "27": "MN",
-    "28": "MS",
-    "29": "MO",
-    "30": "MT",
-    "31": "NE",
-    "32": "NV",
-    "33": "NH",
-    "34": "NJ",
-    "35": "NM",
-    "36": "NY",
-    "37": "NC",
-    "38": "ND",
-    "39": "OH",
-    "40": "OK",
-    "41": "OR",
-    "42": "PA",
-    "44": "RI",
-    "45": "SC",
-    "46": "SD",
-    "47": "TN",
-    "48": "TX",
-    "49": "UT",
-    "50": "VT",
-    "51": "VA",
-    "53": "WA",
-    "54": "WV",
-    "55": "WI",
-    "56": "WY"
+    "01": "Alabama",
+    "02": "Alaska",
+    "04": "Arizona",
+    "05": "Arkansas",
+    "06": "California",
+    "08": "Colorado",
+    "09": "Connecticut",
+    "10": "Delaware",
+    "11": "District of Columbia",
+    "12": "Florida",
+    "13": "Georgia",
+    "15": "Hawaii",
+    "16": "Idaho",
+    "17": "Illinois",
+    "18": "Indiana",
+    "19": "Iowa",
+    "20": "Kansas",
+    "21": "Kentucky",
+    "22": "Louisiana",
+    "23": "Maine",
+    "24": "Maryland",
+    "25": "Massachusetts",
+    "26": "Michigan",
+    "27": "Minnesota",
+    "28": "Mississippi",
+    "29": "Missouri",
+    "30": "Montana",
+    "31": "Nebraska",
+    "32": "Nevada",
+    "33": "New Hampshire",
+    "34": "New Jersey",
+    "35": "New Mexico",
+    "36": "New York",
+    "37": "North Carolina",
+    "38": "North Dakota",
+    "39": "Ohio",
+    "40": "Oklahoma",
+    "41": "Oregon",
+    "42": "Pennsylvania",
+    "44": "Rhode Island",
+    "45": "South Carolina",
+    "46": "South Dakota",
+    "47": "Tennessee",
+    "48": "Texas",
+    "49": "Utah",
+    "50": "Vermont",
+    "51": "Virginia",
+    "53": "Washington",
+    "54": "West Virginia",
+    "55": "Wisconsin",
+    "56": "Wyoming"
 };
 
 var color = d3.scaleLinear().range(["blue", "red"]);
@@ -66,31 +65,39 @@ var color = d3.scaleLinear().range(["blue", "red"]);
 var svg = d3.select("svg"),
     path = d3.geoPath();
 
-// @todo need dummy data for init
-function update(data) {
-    var data = JSON.parse(data);
-
-    color.domain(d3.extent(data, function(d) { return d.value; }));
-
-    // @todo join this with state data
-    data.forEach(function(d) {
-        svg.select("#" + d.state)
-            .transition()
-            .duration(1000)
-                .style("fill", color(d.value));
-    });
+// receives messages from Elm
+function update(payload) {
+    var payload = JSON.parse(payload);
 }
 
-function render() {
-    console.log("render()")
+// @todo need dummy data for init
+function updatez(data) {
+//    var data = JSON.parse(data);
+//
+//    color.domain(d3.extent(data, function(d) { return d.value; }));
+//
+//    // @todo join this with state data
+//    data.forEach(function(d) {
+//        svg.select("#" + d.state)
+//            .transition()
+//            .duration(1000)
+//                .style("fill", color(d.value));
+//    });
+}
+
+function main() {
     d3.queue()
-        // @todo pull this local
-        .defer(d3.json, "https://d3js.org/us-10m.v1.json")
+        .defer(d3.json, "static/data/us-10m.v1.json")
+        .defer(d3.csv, "static/data/incidents.csv")
         .await(ready);
 }
 
-function ready(error, us, stateData) {
+function ready(error, us, incidents) {
     if (error) throw error;
+
+    // @todo filter incidents
+    // @todo need default filter object
+    var incidents = formatIncidents(incidents);
 
     svg.append("g")
         .attr("class", "states")
@@ -108,4 +115,30 @@ function ready(error, us, stateData) {
 //            return a !== b; })));
 }
 
-render();
+function formatIncidents(incidents) {
+    var data = {};
+
+    for (var key in states) {
+        data[states[key]] = {
+            "incidents": 0,
+            "injured": 0,
+            "killed": 0,
+            "victims": 0
+        }
+    }
+
+    incidents.forEach(function(i) {
+        var state = data[i.State],
+            injured = parseInt(i["# Injured"]),
+            killed = parseInt(i["# Killed"]);
+        state.incidents++;
+        state.injured += injured;
+        state.killed += killed;
+        state.victims += (injured + killed);
+    });
+
+    console.log(data);
+    return data;
+}
+
+main();

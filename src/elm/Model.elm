@@ -5,10 +5,9 @@ import Filter
 
 
 type alias Model = {
-  filter : Filter.Filter,
-  records : List Record.Record
+  filter : Filter.Filter
 }
 
 
 init : Model
-init = { filter = Filter.init, records = Record.init }
+init = { filter = Filter.init }

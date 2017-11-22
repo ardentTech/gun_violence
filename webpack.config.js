@@ -112,6 +112,9 @@ if (isProd === true) {
                 from: 'src/static/img/',
                 to: 'static/img/'
             }, {
+                from: 'src/static/data/',
+                to: 'static/data/'
+            }, {
                 from: 'src/favicon.ico'
             }]),
 
