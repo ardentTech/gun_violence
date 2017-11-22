@@ -1,9 +1,10 @@
 port module D3 exposing (newState, update) 
 
-import Date exposing (toTime)
-import Json.Encode exposing (Value, encode, float, int, list, object, string)
+import Json.Encode exposing (..)
 
+import Category
 import Model exposing (..)
+import Record exposing (Record)
 import USState exposing (State)
 
 
@@ -18,26 +19,42 @@ port newState : String -> Cmd msg
 
 update : Model -> Cmd msg
 update model =
-  newState ""
+  let
+    payload = case model.filter.category of
+      Category.Injured -> injuredData model.records
+      Category.Killed -> killedData model.records
+  in
+    newState payload
 
---  let
---    records = model.records 
---  in
---    newState <| encodeRecords records
---
---
----- PRIVATE
---
---
---encodeRecord : Record -> Value
---encodeRecord record =
---  object [
---    ("date", float <| toTime record.date),
---    ("injured", int record.injured),
---    ("killed", int record.killed),
---    ("state", string <| toString record.state)]
---
---
---encodeRecords : List Record -> String
---encodeRecords records = encode 0 <| object [
---  ("records", list <| List.map encodeRecord records)]
+
+-- @todo combine these
+injuredData : List Record -> String
+injuredData records =
+  let
+    data = List.map (\r -> Data r.state r.injured) records
+  in
+    encodeData data
+
+
+killedData : List Record -> String
+killedData records =
+  let
+    data = List.map (\r -> Data r.state r.killed) records
+  in
+    encodeData data
+
+
+
+
+-- PRIVATE
+
+
+encodeData : List Data -> String
+encodeData data =
+  let
+    encode_ d = object [
+      ("state", string <| toString d.state),
+      ("value", int d.value)]
+
+  in
+    encode 0 <| list <| List.map encode_ data
