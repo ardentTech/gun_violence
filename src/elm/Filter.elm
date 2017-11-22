@@ -1,7 +1,6 @@
 module Filter exposing (..)
 
-
-type Category = Injured | Killed
+import Category exposing (..)
 
 
 type alias Filter = {

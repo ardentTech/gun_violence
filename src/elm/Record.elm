@@ -30,7 +30,3 @@ demoRecords =
       Record (timestamp "November 17, 2017") 4 0 LA,
       Record (timestamp "December 31, 2016") 2 2 GA
     ]
-
-
---categoryMap = Dict.fromList [
---  ()]
