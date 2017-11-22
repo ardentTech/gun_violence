@@ -6,15 +6,6 @@ import Dict
 import USState exposing (..)
 
 
-type Category = Injured | Killed
-
-
-type alias Filter = {
-  category : Category,
-  years : List Int  -- @todo limit this to 2014-2017
-}
-
-
 type alias Record = {
   date : Date,
   injured : Int,
@@ -23,16 +14,8 @@ type alias Record = {
 }
 
 
-initialFilter : Filter
-initialFilter = { category = Killed, years = [ 2017 ] }
-
-
-initial : List Record
-initial = demoRecords
-
-
-setCategory : Category -> Filter -> Filter
-setCategory c f = { f | category = c }
+init : List Record
+init = demoRecords
 
 
 demoRecords : List Record

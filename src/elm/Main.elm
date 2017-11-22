@@ -12,7 +12,7 @@ import View exposing (view)
 main : Program Never Model.Model Msg
 main =
   let
-    model = Model.initial
+    model = Model.init
   in
     Html.program {
       init = ( model, D3.update model ),

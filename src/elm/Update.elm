@@ -3,7 +3,7 @@ module Update exposing (update)
 import D3
 import Message exposing (Msg(..))
 import Model exposing (Model)
-import Record exposing (Category(..), setCategory)
+import Filter exposing (Category(..), setCategory)
 
 
 -- @todo if updating model.selectedYears only allow 2014-2017

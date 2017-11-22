@@ -1,13 +1,14 @@
 module Model exposing (..)
 
 import Record
+import Filter
 
 
 type alias Model = {
-  filter : Record.Filter,
+  filter : Filter.Filter,
   records : List Record.Record
 }
 
 
-initial : Model
-initial = { filter = Record.initialFilter, records = Record.initial }
+init : Model
+init = { filter = Filter.init, records = Record.init }
