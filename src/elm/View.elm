@@ -12,9 +12,7 @@ import Message exposing (Msg(SetCategory))
 -- @todo put category dropdown in Category module
 view : Model -> Html Msg
 view model =
-  div [ id "category" ] [
-    select [ onInput SetCategory ] <| options model
-  ]
+  div [ id "category" ] [ select [ onInput SetCategory ] <| options model ]
 
 
 -- PRIVATE
@@ -22,10 +20,12 @@ view model =
 
 options : Model -> List ( Html Msg )
 options model =
+  List.map (\c -> toOption c <| c == model.filter.category) Category.all
+
+
+toOption : Category.Category -> Bool -> Html Msg
+toOption category isSelected =
   let
-    -- @todo refactor this
-    toOption c = case c == model.filter.category of
-      True -> option [ selected True, value (Category.toName c) ] [ text (Category.toName c) ]
-      False -> option [ value (Category.toName c) ] [ text (Category.toName c) ] 
+    name = Category.toName category
   in
-    List.map toOption Category.all
+    option [ selected isSelected, value name ] [ text name ]

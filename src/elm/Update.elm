@@ -11,6 +11,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
     SetCategory category ->
+      -- @todo this translation should happen in the view
       case Category.fromName category of
         Just c ->
           let
@@ -18,4 +19,5 @@ update msg model =
           in
             ( newModel, D3.update newModel )
         _ -> ( model, Cmd.none )
+    ToggleYear year -> ( model, Cmd.none )
     _ -> ( model, Cmd.none )

@@ -8,6 +8,10 @@ import Record exposing (Record)
 import USState exposing (State)
 
 
+-- @todo sum for all states so that there are only 51 records sent to D3
+-- @todo filter by year
+
+
 type alias Data = {
   state : State,
   value : Int
