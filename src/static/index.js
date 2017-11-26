@@ -1,4 +1,5 @@
-// inject bundled Elm app into div#main
+// @todo tooltips with state name and value
+// @todo proper data binding
 var Elm = require( '../elm/Main' ),
     app = Elm.Main.embed( document.getElementById( 'main' ) );
 

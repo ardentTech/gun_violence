@@ -18,5 +18,9 @@ update msg model =
           in
             ( newModel, D3.update newModel )
         _ -> ( model, Cmd.none )
-    ToggleYear year -> ( model, Cmd.none )
+    SetYear y ->
+      let
+        newModel = { model | years = [ Result.withDefault 2017 <| String.toInt y ]}
+      in
+        ( newModel, D3.update newModel )
     _ -> ( model, Cmd.none )
