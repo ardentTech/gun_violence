@@ -63,7 +63,7 @@ var states = {
     "56": "Wyoming"
 };
 
-var color = d3.scaleLinear().range(["white", "red"]);
+var color = d3.scaleOrdinal(d3.schemeReds[9]);
 
 var svg = d3.select("svg"),
     path = d3.geoPath();
