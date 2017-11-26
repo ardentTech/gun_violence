@@ -1,4 +1,4 @@
-module Category exposing (Category(..), all, fromName, toName)
+module Category exposing (Category(..), all, fromName, init, toName)
 
 import Dict
 
@@ -13,6 +13,10 @@ all = [ Injured, Killed ]
 
 fromName : String -> Maybe Category
 fromName key = Dict.get key hash
+
+
+init : Category
+init = Killed
 
 
 toName : Category -> String

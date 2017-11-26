@@ -20,7 +20,7 @@ view model =
 
 options : Model -> List ( Html Msg )
 options model =
-  List.map (\c -> toOption c <| c == model.filter.category) Category.all
+  List.map (\c -> toOption c <| c == model.category) Category.all
 
 
 toOption : Category.Category -> Bool -> Html Msg

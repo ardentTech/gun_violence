@@ -2,7 +2,6 @@ module Update exposing (update)
 
 import Category
 import D3
-import Filter exposing (setCategory)
 import Message exposing (Msg(..))
 import Model exposing (Model)
 
@@ -15,7 +14,7 @@ update msg model =
       case Category.fromName category of
         Just c ->
           let
-            newModel = { model | filter = setCategory c model.filter }
+            newModel = { model | category = c }
           in
             ( newModel, D3.update newModel )
         _ -> ( model, Cmd.none )

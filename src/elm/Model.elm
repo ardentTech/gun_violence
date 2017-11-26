@@ -1,13 +1,15 @@
 module Model exposing (..)
 
-import Record
-import Filter
+import Category exposing (Category)
 
 
 type alias Model = {
-  filter : Filter.Filter
+  category : Category,
+  years : List Int
 }
 
 
 init : Model
-init = { filter = Filter.init }
+init = {
+  category = Category.init,
+  years = [ 2017 ]}
