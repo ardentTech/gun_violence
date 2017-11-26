@@ -142,7 +142,9 @@ function ready(error, topo, stats) {
         .enter().append("path")
             .attr("d", path)
             .attr("class", "state")
-            .attr("fill", "white");
+            .attr("fill", "white")
+            .append("svg:title")
+                .text(function(d) { return states[d.id]; });
 
     dataLoaded = true;
 }
