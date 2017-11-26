@@ -7,7 +7,7 @@ app.ports.newState.subscribe(function(payload) {
     update(payload);
 });
 
-var data = {}, dataReady = false;
+var data = {}, dataLoaded = false, usTopo = null;
 
 var states = {
     "01": "Alabama",
@@ -63,45 +63,40 @@ var states = {
     "56": "Wyoming"
 };
 
-var color = d3.scaleLinear().range(["yellow", "red"]);
+var color = d3.scaleLinear().range(["white", "red"]);
 
 var svg = d3.select("svg"),
     path = d3.geoPath();
 
 // receives messages from Elm
 function update(payload) {
-    if (!dataReady) {
-        setTimeout(function() {
-            update(payload);
-        }, 500);
-    } else {
-        var filter = JSON.parse(payload),
-            category = filter.category.toLowerCase(),
-            dataz = {};
+    if (dataLoaded) {
+        var parsed = JSON.parse(payload),
+            category = parsed.category.toLowerCase(),
+            years = parsed.years;
 
-        filter.years.forEach(function(y) {
-            for (var state in data[y]) {
-                if (!dataz.hasOwnProperty(state)) {
-                    dataz[state] = data[y][state][category];
-                } else {
-                    dataz[state] += data[y][state][category];
+        data.geometries.forEach(function(g) {
+            var value = 0;
+
+            years.forEach(function(y) {
+                if (g.stats.hasOwnProperty(y)) {
+                    value += g.stats[y][category];
                 }
-            }
+            });
+
+            g.value = value;
         });
 
-        var result = [];
-        for (var state in dataz) {
-            result.push({"state": state, "value": dataz[state]});
-        }
-        color.domain(d3.extent(result, function(d) { return d.value; }));
+        color.domain(d3.extent(data.geometries, function(d) { return d.value; }));
 
-        // @todo join this with state data
-        result.forEach(function(d) {
-            svg.select("#" + d.state)
-                .transition()
-                .duration(1000)
-                    .style("fill", color(d.value));
-        });
+        svg.selectAll(".state")
+            .transition()
+            .duration(1000)
+            .style("fill", function(s) {
+                var d = data.geometries.find(function(g) { return s.id == g.id; });
+                return color(d.value); });
+    } else {
+        setTimeout(function() { update(payload); }, 500);
     }
 }
 
@@ -112,58 +107,44 @@ function main() {
         .await(ready);
 }
 
-function ready(error, us, incidents) {
+function ready(error, topo, stats) {
     if (error) throw error;
 
-    // @todo filter incidents
-    // @todo need default filter object
-    format(incidents);
+    data = topo.objects.states;
+    usTopo = topo;
 
-    svg.append("g")
-        .attr("class", "states")
-        .selectAll("path")
-        .data(topojson.feature(us, us.objects.states).features)
-        .enter().append("path")
-            .attr("d", path)
-            .attr("class", "state")
-            .attr("fill", "lightgrey")
-            .attr("id", function(d) { return states[d.id]; });
+    data.geometries.forEach(function(g) { g.stats = {}; });
 
-    // @todo what is this for?
-//    svg.append("path")
-//        .attr("class", "state-borders")
-//        .attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) {
-//            return a !== b; })));
+    stats.forEach(function(s) {
+        // get state data object
+        var d = data.geometries.find(function(g) { return states[g.id] == s.State; }),
+            year = s["Incident Date"].split(", ")[1],
+            injured = parseInt(s["# Injured"]),
+            killed = parseInt(s["# Killed"]);
 
-    dataReady = true;
-}
-
-function format(incidents) {
-    incidents.forEach(function(i) {
-        var year = i["Incident Date"].split(", ")[1];
-
-        if (!data.hasOwnProperty(year)) {
-            data[year] = {};
-        }
-
-        var state = i.State;
-        if (!data[year].hasOwnProperty(state)) {
-            data[year][state] = {
+        if (!d.stats.hasOwnProperty(year)) d.stats[year] = {
             "incidents": 0,
             "injured": 0,
             "killed": 0,
             "victims": 0
-            }
-        }
-        
-        var injured = parseInt(i["# Injured"]),
-            killed = parseInt(i["# Killed"]);
+        };
 
-        data[year][state].incidents++;
-        data[year][state].injured += injured;
-        data[year][state].killed += killed;
-        data[year][state].victims += (injured + killed);
+        d.stats[year].incidents++;
+        d.stats[year].injured += injured;
+        d.stats[year].killed += killed;
+        d.stats[year].victims += (injured + killed);
     });
+
+    svg.append("g")
+        .attr("class", "states")
+        .selectAll(".state")
+        .data(topojson.feature(topo, data).features)
+        .enter().append("path")
+            .attr("d", path)
+            .attr("class", "state")
+            .attr("fill", "white");
+
+    dataLoaded = true;
 }
 
 main();
