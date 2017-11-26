@@ -103,7 +103,7 @@ function update(payload) {
 function main() {
     d3.queue()
         .defer(d3.json, "static/data/us-10m.v1.json")
-        .defer(d3.csv, "static/data/incidents.csv")
+        .defer(d3.csv, "static/data/stats.csv")
         .await(ready);
 }
 
