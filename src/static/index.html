@@ -4,13 +4,18 @@
     <meta charSet="utf-8"/>
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>US Gun Violence</title>
-    <meta name="description" content="Elm Webpack Starter"/>
-    <meta name="author" content="Peter Morawiec"/>
+    <meta name="description" content="US Gun Violence Visualizations"/>
+    <meta name="author" content="Jonathan D. Baker"/>
     <link rel="shortcut icon" type="image/x-icon" href="favicon.ico"/>
+    <link href="static/styles/bootstrap.min.css" rel="stylesheet"/>
   </head>
   <body>
-    <div id="main"></div>
-    <svg width="960" height="600"></svg>
+    <div class="container-fluid">
+        <div class="row" id="main"></div>
+        <div class="row" id="visualization">
+            <svg width="960" height="600"></svg>
+        </div>
+    </div>
     <script src="https://d3js.org/d3.v4.min.js"></script>
     <script src="https://d3js.org/topojson.v2.min.js"></script>
   </body>
