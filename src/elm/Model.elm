@@ -12,4 +12,4 @@ type alias Model = {
 init : Model
 init = {
   category = Category.init,
-  years = [ 2017 ]}
+  years = [ 2017, 2016 ]}

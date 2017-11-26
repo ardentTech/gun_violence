@@ -6,6 +6,8 @@ app.ports.newState.subscribe(function(payload) {
     update(payload);
 });
 
+var data = {}, dataReady = false;
+
 var states = {
     "01": "Alabama",
     "02": "Alaska",
@@ -60,29 +62,46 @@ var states = {
     "56": "Wyoming"
 };
 
-var color = d3.scaleLinear().range(["blue", "red"]);
+var color = d3.scaleLinear().range(["yellow", "red"]);
 
 var svg = d3.select("svg"),
     path = d3.geoPath();
 
 // receives messages from Elm
 function update(payload) {
-    var payload = JSON.parse(payload);
-}
+    if (!dataReady) {
+        setTimeout(function() {
+            update(payload);
+        }, 500);
+    } else {
+        var filter = JSON.parse(payload),
+            category = filter.category.toLowerCase(),
+            dataz = {};
 
-// @todo need dummy data for init
-function updatez(data) {
-//    var data = JSON.parse(data);
-//
-//    color.domain(d3.extent(data, function(d) { return d.value; }));
-//
-//    // @todo join this with state data
-//    data.forEach(function(d) {
-//        svg.select("#" + d.state)
-//            .transition()
-//            .duration(1000)
-//                .style("fill", color(d.value));
-//    });
+        filter.years.forEach(function(y) {
+            for (var state in data[y]) {
+                if (!dataz.hasOwnProperty(state)) {
+                    dataz[state] = data[y][state][category];
+                } else {
+                    dataz[state] += data[y][state][category];
+                }
+            }
+        });
+
+        var result = [];
+        for (var state in dataz) {
+            result.push({"state": state, "value": dataz[state]});
+        }
+        color.domain(d3.extent(result, function(d) { return d.value; }));
+
+        // @todo join this with state data
+        result.forEach(function(d) {
+            svg.select("#" + d.state)
+                .transition()
+                .duration(1000)
+                    .style("fill", color(d.value));
+        });
+    }
 }
 
 function main() {
@@ -97,7 +116,7 @@ function ready(error, us, incidents) {
 
     // @todo filter incidents
     // @todo need default filter object
-    var incidents = formatIncidents(incidents);
+    format(incidents);
 
     svg.append("g")
         .attr("class", "states")
@@ -106,6 +125,7 @@ function ready(error, us, incidents) {
         .enter().append("path")
             .attr("d", path)
             .attr("class", "state")
+            .attr("fill", "lightgrey")
             .attr("id", function(d) { return states[d.id]; });
 
     // @todo what is this for?
@@ -113,32 +133,36 @@ function ready(error, us, incidents) {
 //        .attr("class", "state-borders")
 //        .attr("d", path(topojson.mesh(us, us.objects.states, function(a, b) {
 //            return a !== b; })));
+
+    dataReady = true;
 }
 
-function formatIncidents(incidents) {
-    var data = {};
+function format(incidents) {
+    incidents.forEach(function(i) {
+        var year = i["Incident Date"].split(", ")[1];
 
-    for (var key in states) {
-        data[states[key]] = {
+        if (!data.hasOwnProperty(year)) {
+            data[year] = {};
+        }
+
+        var state = i.State;
+        if (!data[year].hasOwnProperty(state)) {
+            data[year][state] = {
             "incidents": 0,
             "injured": 0,
             "killed": 0,
             "victims": 0
+            }
         }
-    }
-
-    incidents.forEach(function(i) {
-        var state = data[i.State],
-            injured = parseInt(i["# Injured"]),
+        
+        var injured = parseInt(i["# Injured"]),
             killed = parseInt(i["# Killed"]);
-        state.incidents++;
-        state.injured += injured;
-        state.killed += killed;
-        state.victims += (injured + killed);
-    });
 
-    console.log(data);
-    return data;
+        data[year][state].incidents++;
+        data[year][state].injured += injured;
+        data[year][state].killed += killed;
+        data[year][state].victims += (injured + killed);
+    });
 }
 
 main();
