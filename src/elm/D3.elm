@@ -3,7 +3,6 @@ port module D3 exposing (newState, update)
 import Json.Encode exposing (..)
 
 import Model exposing (..)
-import USState exposing (State)
 
 
 port newState : String -> Cmd msg
