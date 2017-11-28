@@ -1,15 +1,15 @@
+// @todo message to Elm with Years
 // @todo tooltips with state name and value
-// @todo proper data binding
-var Elm = require( '../elm/Main' ),
-    app = Elm.Main.embed( document.getElementById( 'main' ) );
 
-app.ports.newState.subscribe(function(payload) {
-    update(payload);
-});
+var Elm = require( "../elm/Main" ),
+    app = Elm.Main.embed(document.getElementById("main")),
+    color = d3.scaleSequential(d3.interpolateReds),
+    svg = d3.select("svg"),
+    path = d3.geoPath(),
+    rendered = false,
+    data = {};
 
-var data = {}, dataLoaded = false, usTopo = null;
-
-var states = {
+var fipsToName = {
     "01": "Alabama",
     "02": "Alaska",
     "04": "Arizona",
@@ -63,90 +63,93 @@ var states = {
     "56": "Wyoming"
 };
 
-var color = d3.scaleOrdinal(d3.schemeReds[9]);
+function main() {
+    d3.queue()
+        .defer(d3.json, "static/data/us-10m.v1.json")
+        .defer(d3.csv, "static/data/stats.csv")
+        .await(render);
 
-var svg = d3.select("svg"),
-    path = d3.geoPath();
+    app.ports.newState.subscribe(function(state) { update(state); });
+}
 
-// receives messages from Elm
-function update(payload) {
-    if (dataLoaded) {
-        var parsed = JSON.parse(payload),
+function render(error, topo, stats) {
+    if (error) throw error;
+
+    stats.forEach(function(s) {
+        var year = s["Incident Date"].split(", ")[1],
+            injured = parseInt(s["# Injured"]),
+            killed = parseInt(s["# Killed"]);
+
+        if (!data.hasOwnProperty(s.State)) {
+            data[s.State] = {"stats": {}}; 
+        }
+
+        var state = data[s.State];
+
+        if (!state.stats.hasOwnProperty(year)) {
+            state.stats[year] = { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 };
+        }
+
+        state.stats[year].incidents++;
+        state.stats[year].injured += injured;
+        state.stats[year].killed += killed;
+        state.stats[year].victims += (injured + killed);
+    });
+
+    svg.append("svg:g")
+        .attr("class", "states")
+        .selectAll(".state")
+        .data(topojson.feature(topo, topo.objects.states).features)
+        .enter().append("svg:path")
+            .attr("d", path)
+            .attr("class", "state")
+//            .attr("id", function(d) { return fipsToName[d.id]; })
+            .attr("fill", function(d) { return color(0); })
+            .append("svg:title")
+                .text(function(d) { return fipsToName[d.id]; });
+
+    rendered = true;
+}
+
+function update(state) {
+    if (rendered) {
+        var parsed = JSON.parse(state),
             category = parsed.category.toLowerCase(),
+            maxValue = 0,
+            minValue = 0,
             years = parsed.years;
 
-        data.geometries.forEach(function(g) {
-            var value = 0;
+        for (var k in data) {
+            var state = data[k], value = 0;
 
-            years.forEach(function(y) {
-                if (g.stats.hasOwnProperty(y)) {
-                    value += g.stats[y][category];
+            years.forEach(function(year) {
+                if (state.stats.hasOwnProperty(year)) {
+                    value += state.stats[year][category];
                 }
             });
 
-            g.value = value;
-        });
+            if (value > maxValue) maxValue = value;
+            if (value < minValue) minValue = value;
+            state.value = value;
+        }
 
-        color.domain(d3.extent(data.geometries, function(d) { return d.value; }));
+        color.domain([minValue, maxValue]);
 
         svg.selectAll(".state")
             .transition()
             .duration(1000)
             .style("fill", function(s) {
-                var d = data.geometries.find(function(g) { return s.id == g.id; });
-                return color(d.value); });
+                var name = fipsToName[s.id];
+                if (data.hasOwnProperty(name)) {
+                    return color(data[name].value);
+                } else {
+                    return color(minValue);
+                }
+            });
     } else {
-        setTimeout(function() { update(payload); }, 500);
-    }
-}
-
-function main() {
-    d3.queue()
-        .defer(d3.json, "static/data/us-10m.v1.json")
-        .defer(d3.csv, "static/data/stats.csv")
-        .await(ready);
-}
-
-function ready(error, topo, stats) {
-    if (error) throw error;
-
-    data = topo.objects.states;
-    usTopo = topo;
-
-    data.geometries.forEach(function(g) { g.stats = {}; });
-
-    stats.forEach(function(s) {
-        // get state data object
-        var d = data.geometries.find(function(g) { return states[g.id] == s.State; }),
-            year = s["Incident Date"].split(", ")[1],
-            injured = parseInt(s["# Injured"]),
-            killed = parseInt(s["# Killed"]);
-
-        if (!d.stats.hasOwnProperty(year)) d.stats[year] = {
-            "incidents": 0,
-            "injured": 0,
-            "killed": 0,
-            "victims": 0
-        };
-
-        d.stats[year].incidents++;
-        d.stats[year].injured += injured;
-        d.stats[year].killed += killed;
-        d.stats[year].victims += (injured + killed);
-    });
-
-    svg.append("g")
-        .attr("class", "states")
-        .selectAll(".state")
-        .data(topojson.feature(topo, data).features)
-        .enter().append("path")
-            .attr("d", path)
-            .attr("class", "state")
-            .attr("fill", "white")
-            .append("svg:title")
-                .text(function(d) { return states[d.id]; });
-
-    dataLoaded = true;
-}
+        // @todo limit how many times this can execute
+        setTimeout(function() { update(state); }, 500);
+    } 
+} 
 
 main();
