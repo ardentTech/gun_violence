@@ -27,6 +27,7 @@ var commonConfig = {
     output: {
         path: outputPath,
         filename: `static/js/${outputFilename}`,
+        publicPath: '/'
     },
     resolve: {
         extensions: ['.js', '.elm'],
@@ -104,16 +105,15 @@ if (isProd === true) {
             }]
         },
         plugins: [
-            new ExtractTextPlugin({
-                filename: 'static/css/[name]-[hash].css',
-                allChunks: true,
-            }),
             new CopyWebpackPlugin([{
                 from: 'src/static/img/',
                 to: 'static/img/'
             }, {
                 from: 'src/static/data/',
                 to: 'static/data/'
+            }, {
+                from: 'src/static/styles/',
+                to: 'static/styles/'
             }, {
                 from: 'src/favicon.ico'
             }]),

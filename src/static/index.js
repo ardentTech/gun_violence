@@ -149,7 +149,7 @@ function update(state) {
                 .text(function(d) {
                     var name = fipsToName[d.id];
                     if (data.hasOwnProperty(name)) {
-                        return name + " - " + data[name].value;
+                        return name + " : " + data[name].value;
                     } else {
                         return name;
                     }
