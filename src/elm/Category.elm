@@ -24,7 +24,9 @@ options activeCategory =
   let
     options_ = List.map (\c -> toOption c <| c == activeCategory) all
   in
-    div [ id "category" ] [ select [ onInput SetCategory ] <| options_ ]
+    div [ class "form-group mb-2 mr-sm-2 mb-sm-0" ] [
+      label [ for "categories" ] [ text "Category" ],
+      select [ class "form-control", id "categories", onInput SetCategory ] <| options_ ]
 
 
 -- PRIVATE

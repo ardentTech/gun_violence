@@ -13,10 +13,12 @@ import Message exposing (Msg(SetYear))
 view : Model -> Html Msg
 view model =
   div [] [
-    h1 [] [ text "US Mass Shootings" ],
-    div [ id "filters" ] [
-      Category.options model.category,
-      years model.years
+    h3 [] [ text "US Mass Shootings" ],
+    Html.form [ class "form-inline" ] [
+      div [ class "form-group", id "filters" ] [
+        Category.options model.category,
+        years model.years
+      ]
     ]
   ]
 
@@ -26,7 +28,10 @@ view model =
 
 years : List Year -> Html Msg
 years selectedYears =
-    select [ onInput SetYear ] <| List.map (\y -> yearOption y <| List.member y selectedYears) allYears
+  div [ class "form-group mb-2 mr-sm-2 mb-sm-0" ] [
+    label [ for "years" ] [ text "Year" ],
+    select [ class "form-control", id "years", onInput SetYear ] <| List.map (\y -> yearOption y <| List.member y selectedYears) allYears
+  ]
 
 
 yearOption : Year -> Bool -> Html Msg
