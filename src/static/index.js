@@ -103,7 +103,6 @@ function render(error, topo, stats) {
         .enter().append("svg:path")
             .attr("d", path)
             .attr("class", "state")
-//            .attr("id", function(d) { return fipsToName[d.id]; })
             .attr("fill", function(d) { return color(0); })
             .append("svg:title")
                 .text(function(d) { return fipsToName[d.id]; });
@@ -145,7 +144,16 @@ function update(state) {
                 } else {
                     return color(minValue);
                 }
-            });
+            })
+            .select("title")
+                .text(function(d) {
+                    var name = fipsToName[d.id];
+                    if (data.hasOwnProperty(name)) {
+                        return name + " - " + data[name].value;
+                    } else {
+                        return name;
+                    }
+                });
     } else {
         // @todo limit how many times this can execute
         setTimeout(function() { update(state); }, 500);
