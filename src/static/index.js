@@ -1,6 +1,8 @@
 // @todo message to Elm with Years
 // @todo tooltips with state name and value
 
+var TRANSITION_DURATION = 1000;
+
 var Elm = require( "../elm/Main" ),
     app = Elm.Main.embed(document.getElementById("main")),
     color = d3.scaleSequential(d3.interpolateReds),
@@ -9,7 +11,117 @@ var Elm = require( "../elm/Main" ),
     rendered = false,
     data = {};
 
-var fipsToName = {
+function main() {
+    d3.queue()
+        .defer(d3.json, "static/data/us-10m.v1.json")
+        .defer(d3.csv, "static/data/stats.csv")
+        .await(render);
+
+    app.ports.newState.subscribe(function(state) { update(state); });
+}
+
+function parseStats(stats) {
+    stats.forEach(function(s) {
+        var year = s["Incident Date"].split(", ")[1],
+            injured = parseInt(s["# Injured"]),
+            killed = parseInt(s["# Killed"]);
+
+        if (!data.hasOwnProperty(s.State)) {
+            data[s.State] = {"stats": {}}; 
+        }
+
+        var state = data[s.State];
+
+        if (!state.stats.hasOwnProperty(year)) {
+            state.stats[year] = { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 };
+        }
+
+        state.stats[year].incidents++;
+        state.stats[year].injured += injured;
+        state.stats[year].killed += killed;
+        state.stats[year].victims += (injured + killed);
+    });
+}
+
+function render(error, topo, stats) {
+    if (error) throw error;
+
+    parseStats(stats);
+
+    svg.append("svg:g")
+        .attr("class", "states")
+        .selectAll(".state")
+        .data(topojson.feature(topo, topo.objects.states).features)
+        .enter().append("svg:path")
+            .attr("d", path)
+            .attr("class", "state")
+            .attr("fill", function(d) { return color(0); })
+            .append("svg:title")
+                .text(function(d) { return nameFromFips(d.id); });
+
+    rendered = true;
+}
+
+function update(state) {
+    if (rendered) {
+        var parsed = JSON.parse(state),
+            category = parsed.category.toLowerCase(),
+            maxValue = 0,
+            minValue = 0,
+            state = null,
+            value = 0,
+            years = parsed.years;
+
+        for (var k in data) {
+            state = data[k];
+            value = 0;
+
+            years.forEach(function(year) {
+                if (state.stats.hasOwnProperty(year)) {
+                    value += state.stats[year][category];
+                }
+            });
+
+            if (value > maxValue) maxValue = value;
+            if (value < minValue) minValue = value;
+            state.value = value;
+        }
+
+        color.domain([minValue, maxValue]);
+        updateStates(color(minValue));
+    } else {
+        // @todo limit how many times this can execute
+        setTimeout(function() { update(state); }, 500);
+    } 
+} 
+
+function updateStates(defaultColor) {
+    svg.selectAll(".state")
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .style("fill", function(d) {
+            var name = nameFromFips(d.id);
+            return data.hasOwnProperty(name) ? color(data[name].value) : defaultColor;
+        })
+        .select("title")
+            .text(function(d) {
+                var name = nameFromFips(d.id);
+                return data.hasOwnProperty(name) ? name + " : " + data[name].value : name;
+            });
+}
+
+main();
+
+
+// @todo usstates.js
+
+function nameFromFips(fips) {
+    return map_[fips];
+}
+
+// PRIVATE
+
+var map_ = {
     "01": "Alabama",
     "02": "Alaska",
     "04": "Arizona",
@@ -62,102 +174,3 @@ var fipsToName = {
     "55": "Wisconsin",
     "56": "Wyoming"
 };
-
-function main() {
-    d3.queue()
-        .defer(d3.json, "static/data/us-10m.v1.json")
-        .defer(d3.csv, "static/data/stats.csv")
-        .await(render);
-
-    app.ports.newState.subscribe(function(state) { update(state); });
-}
-
-function render(error, topo, stats) {
-    if (error) throw error;
-
-    stats.forEach(function(s) {
-        var year = s["Incident Date"].split(", ")[1],
-            injured = parseInt(s["# Injured"]),
-            killed = parseInt(s["# Killed"]);
-
-        if (!data.hasOwnProperty(s.State)) {
-            data[s.State] = {"stats": {}}; 
-        }
-
-        var state = data[s.State];
-
-        if (!state.stats.hasOwnProperty(year)) {
-            state.stats[year] = { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 };
-        }
-
-        state.stats[year].incidents++;
-        state.stats[year].injured += injured;
-        state.stats[year].killed += killed;
-        state.stats[year].victims += (injured + killed);
-    });
-
-    svg.append("svg:g")
-        .attr("class", "states")
-        .selectAll(".state")
-        .data(topojson.feature(topo, topo.objects.states).features)
-        .enter().append("svg:path")
-            .attr("d", path)
-            .attr("class", "state")
-            .attr("fill", function(d) { return color(0); })
-            .append("svg:title")
-                .text(function(d) { return fipsToName[d.id]; });
-
-    rendered = true;
-}
-
-function update(state) {
-    if (rendered) {
-        var parsed = JSON.parse(state),
-            category = parsed.category.toLowerCase(),
-            maxValue = 0,
-            minValue = 0,
-            years = parsed.years;
-
-        for (var k in data) {
-            var state = data[k], value = 0;
-
-            years.forEach(function(year) {
-                if (state.stats.hasOwnProperty(year)) {
-                    value += state.stats[year][category];
-                }
-            });
-
-            if (value > maxValue) maxValue = value;
-            if (value < minValue) minValue = value;
-            state.value = value;
-        }
-
-        color.domain([minValue, maxValue]);
-
-        svg.selectAll(".state")
-            .transition()
-            .duration(1000)
-            .style("fill", function(s) {
-                var name = fipsToName[s.id];
-                if (data.hasOwnProperty(name)) {
-                    return color(data[name].value);
-                } else {
-                    return color(minValue);
-                }
-            })
-            .select("title")
-                .text(function(d) {
-                    var name = fipsToName[d.id];
-                    if (data.hasOwnProperty(name)) {
-                        return name + " : " + data[name].value;
-                    } else {
-                        return name;
-                    }
-                });
-    } else {
-        // @todo limit how many times this can execute
-        setTimeout(function() { update(state); }, 500);
-    } 
-} 
-
-main();
