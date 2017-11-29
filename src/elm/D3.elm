@@ -22,6 +22,14 @@ update model =
 
 encode_ : Model -> String
 encode_ model =
-  encode 0 <| object [
-    ("category", string <| Maybe.withDefault "" model.selectedCategory),
-    ("year", int <| Maybe.withDefault 0 model.selectedYear)]
+  let
+    defaultCategory = case List.head model.categories of
+      Just c -> c
+      _ -> ""
+    defaultYear = case List.head model.years of
+      Just y -> y
+      _ -> 0
+  in
+    encode 0 <| object [
+      ("category", string <| Maybe.withDefault defaultCategory model.selectedCategory),
+      ("year", int <| Maybe.withDefault defaultYear model.selectedYear)]

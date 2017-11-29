@@ -21,28 +21,30 @@ view model =
 -- PRIVATE
 
 
-toSelect : List a -> Maybe a -> String -> (String -> Msg) -> Html Msg
-toSelect items selectedItem label_ msg =
+categories : Model -> Html Msg
+categories model =
+  toSelect model.categories model.selectedCategory "Categories" SelectCategory (\c -> c)
+
+
+toSelect : List a -> Maybe a -> String -> (String -> Msg) -> (a -> String) -> Html Msg
+toSelect items selectedItem label_ msg toStr =
     div [ class "form-group" ] [
       label [ class "col-form-label-sm" ] [ text label_ ],
-      select [ class "form-control form-control-sm", onInput msg ] <|
-        List.map (\i -> toOption i selectedItem) items
+      select [ class "form-control form-control-sm", id <| String.toLower label_, onInput msg ] <|
+        List.map (\i -> toOption i selectedItem toStr) items
     ]
 
 
-toOption : a -> Maybe a -> Html Msg
-toOption item selectedItem =
+toOption : a -> Maybe a -> (a -> String) -> Html Msg
+toOption item selectedItem toStr =
   let
     isSelected = case selectedItem of
       Just i -> item == i
       _ -> False
   in
-  option [ selected isSelected, value <| toString item ] [ text <| toString item ]
-
-
-categories : Model -> Html Msg
-categories model = toSelect model.categories model.selectedCategory "Categories" SelectCategory
+  option [ selected isSelected, value <| toStr item ] [ text <| toStr item ]
 
 
 years : Model -> Html Msg
-years model = toSelect model.years model.selectedYear "Years" SelectYear
+years model =
+  toSelect model.years model.selectedYear "Years" SelectYear (\i -> toString i)
