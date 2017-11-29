@@ -1,4 +1,4 @@
-port module D3 exposing (newState, update) 
+port module D3 exposing (categories, newState, update, years)
 
 import Json.Encode exposing (..)
 
@@ -6,6 +6,10 @@ import Model exposing (..)
 
 
 port newState : String -> Cmd msg
+
+port categories : (List String -> msg) -> Sub msg
+
+port years : (List Year -> msg) -> Sub msg
 
 
 update : Model -> Cmd msg
@@ -19,5 +23,5 @@ update model =
 encode_ : Model -> String
 encode_ model =
   encode 0 <| object [
-    ("category", string <| toString model.category),
-    ("years", list <| List.map (\y -> int y) model.years)]
+    ("category", string <| Maybe.withDefault "" model.selectedCategory),
+    ("year", int <| Maybe.withDefault 0 model.selectedYear)]

@@ -1,5 +1,9 @@
 module Message exposing (Msg(..))
 
 
--- @todo instead of String use a Category Type
-type Msg = NoOp | SetCategory String | SetYear String
+type Msg =
+  InitCategories (List String) |
+  InitYears (List Int) |
+  NoOp |
+  SelectCategory String |
+  SelectYear String

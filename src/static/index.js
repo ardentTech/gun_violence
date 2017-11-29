@@ -11,15 +11,29 @@ var Elm = require( "../elm/Main" ),
     rendered = false,
     data = {};
 
+function initUI() {
+    var years = new Set();
+    for (var state in data) {
+        for (var year in data[state].stats) {
+            years.add(year);
+        } 
+    }
+
+    app.ports.categories.send(["Incidents", "Injured", "Killed", "Victims"]);
+    app.ports.years.send(Array.from(years).map(function(y) { return parseInt(y); }));
+}
+
 function main() {
     d3.queue()
         .defer(d3.json, "static/data/us-10m.v1.json")
         .defer(d3.csv, "static/data/stats.csv")
-        .await(render);
+        .await(ready);
 
+    // messages from elm
     app.ports.newState.subscribe(function(state) { update(state); });
 }
 
+// @todo indicate this only works with CSV
 function parseStats(stats) {
     stats.forEach(function(s) {
         var year = s["Incident Date"].split(", ")[1],
@@ -43,11 +57,15 @@ function parseStats(stats) {
     });
 }
 
-function render(error, topo, stats) {
+function ready(error, topo, stats) {
     if (error) throw error;
 
     parseStats(stats);
+    initUI();
+    render(topo);
+}
 
+function render(topo) {
     svg.append("svg:g")
         .attr("class", "states")
         .selectAll(".state")
@@ -70,17 +88,15 @@ function update(state) {
             minValue = 0,
             state = null,
             value = 0,
-            years = parsed.years;
+            year = parsed.year;
 
         for (var k in data) {
             state = data[k];
             value = 0;
 
-            years.forEach(function(year) {
-                if (state.stats.hasOwnProperty(year)) {
-                    value += state.stats[year][category];
-                }
-            });
+            if (state.stats.hasOwnProperty(year)) {
+                value += state.stats[year][category];
+            }
 
             if (value > maxValue) maxValue = value;
             if (value < minValue) minValue = value;

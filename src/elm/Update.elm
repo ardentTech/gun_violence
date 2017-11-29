@@ -1,6 +1,5 @@
 module Update exposing (update)
 
-import Category
 import D3
 import Message exposing (Msg(..))
 import Model exposing (Model)
@@ -9,18 +8,25 @@ import Model exposing (Model)
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
   case msg of
-    SetCategory category ->
-      -- @todo this translation should happen in the view
-      case Category.fromName category of
-        Just c ->
-          let
-            newModel = { model | category = c }
-          in
-            ( newModel, D3.update newModel )
-        _ -> ( model, Cmd.none )
-    SetYear y ->
+    InitCategories categories ->
       let
-        newModel = { model | years = [ Result.withDefault 2017 <| String.toInt y ]}
+        newModel = { model | categories = categories }
+      in
+        ( newModel, D3.update newModel )
+    InitYears years ->
+      let
+        newModel = { model | years = years }
+      in
+        ( newModel, D3.update newModel )
+    SelectCategory category ->
+      let
+        newModel = { model | selectedCategory = Just category }
+      in
+        ( newModel, D3.update newModel )
+    SelectYear year ->
+      let
+        year_ = Just <| Result.withDefault 0 (String.toInt year)
+        newModel = { model | selectedYear = year_ }
       in
         ( newModel, D3.update newModel )
     _ -> ( model, Cmd.none )
