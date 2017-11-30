@@ -1,15 +1,14 @@
-// @todo message to Elm with Years
-// @todo tooltips with state name and value
-
 var TRANSITION_DURATION = 1000;
 
 var Elm = require( "../elm/Main" ),
     app = Elm.Main.embed(document.getElementById("main")),
     color = d3.scaleSequential(d3.interpolateReds),
-    svg = d3.select("svg"),
+    svg = null,
+    topo = null,
     path = d3.geoPath(),
     rendered = false,
     data = {};
+//activeYear, activeCategory
 
 function initUI() {
     var years = new Set();
@@ -20,7 +19,9 @@ function initUI() {
     }
 
     app.ports.categories.send(["Incidents", "Injured", "Killed", "Victims"]);
-    app.ports.years.send(Array.from(years).map(function(y) { return parseInt(y); }));
+    app.ports.years.send(Array.from(years)
+        .sort(function(a, b) {return b - a; })
+        .map(function(y) { return parseInt(y); }));
 }
 
 function main() {
@@ -31,6 +32,12 @@ function main() {
 
     // messages from elm
     app.ports.newState.subscribe(function(state) { update(state); });
+}
+
+function onStateClick(d) {
+    var stateName = nameFromFips(d.id);
+//    console.log(stateName);
+    app.ports.selectedState.send(stateName);
 }
 
 // @todo indicate this only works with CSV
@@ -57,31 +64,44 @@ function parseStats(stats) {
     });
 }
 
-function ready(error, topo, stats) {
+function ready(error, topo_, stats) {
     if (error) throw error;
 
+    topo = topo_;
     parseStats(stats);
     initUI();
-    render(topo);
 }
 
 function render(topo) {
-    svg.append("svg:g")
-        .attr("class", "states")
-        .selectAll(".state")
-        .data(topojson.feature(topo, topo.objects.states).features)
-        .enter().append("svg:path")
-            .attr("d", path)
-            .attr("class", "state")
-            .attr("fill", function(d) { return color(0); })
-            .append("svg:title")
-                .text(function(d) { return nameFromFips(d.id); });
+    if (!rendered) {
+        svg = d3.select("svg");
 
-    rendered = true;
+        svg.attr("width", document.getElementById("visualization").clientWidth);
+        // @todo fix this
+        svg.attr("height", 600);
+
+        svg.append("svg:g")
+            .attr("class", "states")
+            .selectAll(".state")
+            .data(topojson.feature(topo, topo.objects.states).features)
+            .enter().append("svg:path")
+                .attr("d", path)
+                .attr("class", "state")
+                .attr("fill", function(d) { return color(0); })
+                .on("click", onStateClick)
+                .append("svg:title")
+                    .text(function(d) { return nameFromFips(d.id); });
+
+        rendered = true;
+    }
 }
 
 function update(state) {
-    if (rendered) {
+
+    if (!rendered) {
+        render(topo);
+        update(state);
+    } else {
         var parsed = JSON.parse(state),
             category = parsed.category.toLowerCase(),
             maxValue = 0,
@@ -105,9 +125,6 @@ function update(state) {
 
         color.domain([minValue, maxValue]);
         updateStates(color(minValue));
-    } else {
-        // @todo limit how many times this can execute
-        setTimeout(function() { update(state); }, 500);
     } 
 } 
 

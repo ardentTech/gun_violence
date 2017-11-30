@@ -3,6 +3,7 @@ module View exposing (view)
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onInput)
+import Svg exposing (svg)
 
 import Model exposing (..)
 import Message exposing (Msg(SelectCategory, SelectYear))
@@ -10,11 +11,19 @@ import Message exposing (Msg(SelectCategory, SelectYear))
 
 view : Model -> Html Msg
 view model =
-  nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ] [
-    span [ class "navbar-brand mr-auto" ] [ text "US Gun Violence" ],
-    Html.form [ class "form-inline" ] [
-      div [ class "form-group text-white", id "filters" ] [ categories model, years model ]
-    ]
+  div [] [
+    nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ] [
+      span [ class "navbar-brand mr-auto" ] [ text "US Gun Violence" ],
+      Html.form [ class "form-inline" ] [
+        div [ class "form-group text-white", id "filters" ] [ categories model, years model ]
+      ]
+    ],
+    div [ class "container-fluid" ] [
+      div [ class "row" ] [
+        div [ class "col-sm-3 bg-light", id "details" ] [ selectedState model ],
+        div [ class "col-sm-9", id "visualization" ] [ svg [] [] ]  
+      ]
+    ] 
   ]
 
 
@@ -43,6 +52,13 @@ toOption item selectedItem toStr =
       _ -> False
   in
   option [ selected isSelected, value <| toStr item ] [ text <| toStr item ]
+
+
+selectedState : Model -> Html Msg
+selectedState model =
+  case model.selectedState of
+    Just s -> text s
+    _ -> text ""
 
 
 years : Model -> Html Msg

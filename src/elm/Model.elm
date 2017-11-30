@@ -7,6 +7,7 @@ type alias Year = Int
 
 type alias Model = {
   selectedCategory : Maybe Category,
+  selectedState : Maybe String,
   selectedYear : Maybe Year,
   categories : List Category,
   years : List Year 
@@ -16,6 +17,7 @@ type alias Model = {
 init : Model
 init = {
   selectedCategory = Nothing,
+  selectedState = Nothing,
   selectedYear = Nothing,
   categories = [],
   years = [] }

@@ -23,6 +23,8 @@ update msg model =
         newModel = { model | selectedCategory = Just category }
       in
         ( newModel, D3.update newModel )
+    SelectState name ->
+      ({ model | selectedState = Just name }, Cmd.none )
     SelectYear year ->
       let
         year_ = Just <| Result.withDefault 0 (String.toInt year)

@@ -6,4 +6,5 @@ type Msg =
   InitYears (List Int) |
   NoOp |
   SelectCategory String |
+  SelectState String |
   SelectYear String
