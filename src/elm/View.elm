@@ -11,18 +11,13 @@ import Message exposing (Msg(SelectCategory, SelectYear))
 
 view : Model -> Html Msg
 view model =
-  div [] [
-    nav [ class "navbar navbar-expand-md navbar-dark fixed-top bg-dark" ] [
-      span [ class "navbar-brand mr-auto" ] [ text "US Gun Violence" ],
-      Html.form [ class "form-inline" ] [
-        div [ class "form-group text-white", id "filters" ] [ categories model, years model ]
-      ]
-    ],
-    div [ class "container-fluid" ] [
-      div [ class "row" ] [
-        div [ class "col-sm-3 bg-light", id "details" ] [ selectedState model ],
-        div [ class "col-sm-9", id "visualization" ] [ svg [] [] ]  
-      ]
+  div [ class "container-fluid" ] [
+    div [ class "row" ] [
+      div [ class "col-sm-3 col-md-3 bg-light", id "controls" ] [
+        h4 [ id "app-title" ] [ text "US Gun Violence" ],
+        Html.form [] [ categories model, years model ]
+      ],
+      div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []]
     ] 
   ]
 
@@ -37,10 +32,12 @@ categories model =
 
 toSelect : List a -> Maybe a -> String -> (String -> Msg) -> (a -> String) -> Html Msg
 toSelect items selectedItem label_ msg toStr =
-    div [ class "form-group" ] [
-      label [ class "col-form-label-sm" ] [ text label_ ],
-      select [ class "form-control form-control-sm", id <| String.toLower label_, onInput msg ] <|
+    div [ class "form-group row" ] [
+      label [ class "col-sm-4 col-form-label-sm" ] [ text label_ ],
+      div [ class "col-sm-8" ] [
+        select [ class "form-control form-control-sm", id <| String.toLower label_, onInput msg ] <|
         List.map (\i -> toOption i selectedItem toStr) items
+      ]
     ]
 
 
@@ -57,7 +54,7 @@ toOption item selectedItem toStr =
 selectedState : Model -> Html Msg
 selectedState model =
   case model.selectedState of
-    Just s -> text s
+    Just s -> h3 [] [ text s ]
     _ -> text ""
 
 

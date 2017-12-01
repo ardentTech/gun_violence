@@ -36,7 +36,6 @@ function main() {
 
 function onStateClick(d) {
     var stateName = nameFromFips(d.id);
-//    console.log(stateName);
     app.ports.selectedState.send(stateName);
 }
 
@@ -76,7 +75,7 @@ function render(topo) {
     if (!rendered) {
         svg = d3.select("svg");
 
-        svg.attr("width", document.getElementById("visualization").clientWidth);
+        svg.attr("width", document.getElementById("vis").clientWidth);
         // @todo fix this
         svg.attr("height", 600);
 
