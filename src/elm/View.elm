@@ -7,6 +7,7 @@ import Svg exposing (svg)
 
 import Model exposing (..)
 import Message exposing (Msg(SelectCategory, SelectYear))
+import TextFormat exposing (capitalize)
 
 
 view : Model -> Html Msg
@@ -54,9 +55,21 @@ toOption item selectedItem toStr =
 
 selectedState : Model -> Html Msg
 selectedState model =
-  case model.selectedState of
-    Just s -> h5 [] [ text s ]
-    _ -> text ""
+  let
+    toRow k v = tr [] <| List.map (\s -> td [] [ text s ]) [k, v]
+  in
+    case model.selectedState of
+      Nothing -> text ""
+      Just ss -> div [ id "state-details" ] [
+        table [ class "table table-hover table-sm table-striped" ] [
+          tbody [] [
+            toRow "State" ss.name,
+            toRow "Year" ( toString ss.year ),
+            toRow ( "# " ++ capitalize ss.category ) ( toString ss.value )
+--            toRow "Rank" "@todo"
+          ]
+        ]
+      ]
 
 
 years : Model -> Html Msg

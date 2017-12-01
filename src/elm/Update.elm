@@ -1,8 +1,10 @@
 module Update exposing (update)
 
+import Json.Decode exposing (..)
+
 import D3
 import Message exposing (Msg(..))
-import Model exposing (Model)
+import Model exposing (Model, SelectedState)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -23,8 +25,13 @@ update msg model =
         newModel = { model | selectedCategory = Just category }
       in
         ( newModel, D3.update newModel )
-    SelectState name ->
-      ({ model | selectedState = Just name }, Cmd.none )
+    SelectState payload ->
+      let
+        res = case decodeString selectedStateDecoder payload of
+          Ok v -> Just v
+          _ -> Nothing
+      in
+        ({ model | selectedState = res }, Cmd.none )
     SelectYear year ->
       let
         year_ = Just <| Result.withDefault 0 (String.toInt year)
@@ -32,3 +39,14 @@ update msg model =
       in
         ( newModel, D3.update newModel )
     _ -> ( model, Cmd.none )
+
+
+-- PRIVATE
+
+
+selectedStateDecoder : Decoder SelectedState
+selectedStateDecoder = map4 SelectedState
+  (field "category" string)
+  (field "name" string)
+  (field "value" int)
+  (field "year" int)

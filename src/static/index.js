@@ -36,7 +36,12 @@ function main() {
 
 function onStateClick(d) {
     var stateName = nameFromFips(d.id);
-    app.ports.selectedState.send(stateName);
+    app.ports.selectedState.send(JSON.stringify({
+        category: filter.category,
+        name: stateName,
+        value: data[stateName].value,
+        year: filter.year
+    }));
 }
 
 // @todo indicate this only works with CSV
