@@ -13,9 +13,10 @@ view : Model -> Html Msg
 view model =
   div [ class "container-fluid" ] [
     div [ class "row" ] [
-      div [ class "col-sm-3 col-md-3 bg-light", id "controls" ] [
+      div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
         h4 [ id "app-title" ] [ text "US Gun Violence" ],
-        Html.form [] [ categories model, years model ]
+        Html.form [ id "filters" ] [ categories model, years model ],
+        selectedState model
       ],
       div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []]
     ] 
@@ -27,7 +28,7 @@ view model =
 
 categories : Model -> Html Msg
 categories model =
-  toSelect model.categories model.selectedCategory "Categories" SelectCategory (\c -> c)
+  toSelect model.categories model.selectedCategory "Category" SelectCategory (\c -> c)
 
 
 toSelect : List a -> Maybe a -> String -> (String -> Msg) -> (a -> String) -> Html Msg
@@ -54,10 +55,10 @@ toOption item selectedItem toStr =
 selectedState : Model -> Html Msg
 selectedState model =
   case model.selectedState of
-    Just s -> h3 [] [ text s ]
+    Just s -> h5 [] [ text s ]
     _ -> text ""
 
 
 years : Model -> Html Msg
 years model =
-  toSelect model.years model.selectedYear "Years" SelectYear (\i -> toString i)
+  toSelect model.years model.selectedYear "Year" SelectYear (\i -> toString i)

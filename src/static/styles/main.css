@@ -1,12 +1,4 @@
-/**.container-fluid { margin-top: 40px; }
-
-.navbar { padding: .25rem 1rem; }
-.navbar-brand { font-size: 1rem; padding: .25rem 0; }
-.form-group label { margin-right: 5px; }
-#categories { margin-right: 15px; }
-svg { margin: 0 auto; }**/
-
-#controls {
+#sidebar {
     border-right: 1px solid #eee;
     bottom: 0;
     left: 0;
@@ -18,7 +10,7 @@ svg { margin: 0 auto; }**/
     z-index: 1000;
 }
 
-#app-title {
+#app-title, #filters {
     border-bottom: 1px solid #eee;
     margin-bottom: 20px;
     padding-bottom: 9px;

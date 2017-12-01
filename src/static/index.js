@@ -3,12 +3,12 @@ var TRANSITION_DURATION = 1000;
 var Elm = require( "../elm/Main" ),
     app = Elm.Main.embed(document.getElementById("main")),
     color = d3.scaleSequential(d3.interpolateReds),
-    svg = null,
-    topo = null,
+    data = {},
+    filter = {"category": null, "year": null},
     path = d3.geoPath(),
     rendered = false,
-    data = {};
-//activeYear, activeCategory
+    svg = null,
+    topo = null;
 
 function initUI() {
     var years = new Set();
@@ -102,19 +102,20 @@ function update(state) {
         update(state);
     } else {
         var parsed = JSON.parse(state),
-            category = parsed.category.toLowerCase(),
             maxValue = 0,
             minValue = 0,
             state = null,
-            value = 0,
-            year = parsed.year;
+            value = 0;
+
+        filter.category = parsed.category.toLowerCase();
+        filter.year = parsed.year;
 
         for (var k in data) {
             state = data[k];
             value = 0;
 
-            if (state.stats.hasOwnProperty(year)) {
-                value += state.stats[year][category];
+            if (state.stats.hasOwnProperty(filter.year)) {
+                value += state.stats[filter.year][filter.category];
             }
 
             if (value > maxValue) maxValue = value;
