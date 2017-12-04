@@ -96,41 +96,71 @@ function render(topo) {
                 .append("svg:title")
                     .text(function(d) { return nameFromFips(d.id); });
 
+        renderLegend();
         rendered = true;
     }
+}
+
+function renderLegend() {
+    var defs = svg.append("svg:defs"),
+        gradient = defs.append("svg:linearGradient")
+            .attr("id", "linear-gradient")
+            .attr("x1", "0%")
+            .attr("y1", "0%")
+            .attr("x2", "100%")
+            .attr("y2", "0%"),
+        min = 0, max = 50, offset = 0, step = 100 / max;
+
+    color.domain([min, max]);
+    d3.range(min, max).forEach(function(i) {
+        gradient.append("svg:stop")
+            .attr("offset", offset + "%")
+            .attr("stop-color", "" + color(i));
+        offset += step;
+    });
+
+    svg.append("svg:rect")
+        .attr("width", 300)
+        .attr("height", 20)
+        .style("fill", "url(#linear-gradient)");
+
+    // @todo axis ticks
+}
+
+// the color scale doesn't need to be re-rendered
+function updateLegend(min, max) {
 }
 
 function update(state) {
 
     if (!rendered) {
         render(topo);
-        update(state);
-    } else {
-        var parsed = JSON.parse(state),
-            maxValue = 0,
-            minValue = 0,
-            state = null,
-            value = 0;
+    }
+    var parsed = JSON.parse(state),
+        maxValue = 0,
+        minValue = 0,
+        state = null,
+        value = 0;
 
-        filter.category = parsed.category.toLowerCase();
-        filter.year = parsed.year;
+    filter.category = parsed.category.toLowerCase();
+    filter.year = parsed.year;
 
-        for (var k in data) {
-            state = data[k];
-            value = 0;
+    for (var k in data) {
+        state = data[k];
+        value = 0;
 
-            if (state.stats.hasOwnProperty(filter.year)) {
-                value += state.stats[filter.year][filter.category];
-            }
-
-            if (value > maxValue) maxValue = value;
-            if (value < minValue) minValue = value;
-            state.value = value;
+        if (state.stats.hasOwnProperty(filter.year)) {
+            value += state.stats[filter.year][filter.category];
         }
 
-        color.domain([minValue, maxValue]);
-        updateStates(color(minValue));
-    } 
+        if (value > maxValue) maxValue = value;
+        if (value < minValue) minValue = value;
+        state.value = value;
+    }
+
+    color.domain([minValue, maxValue]);
+    updateLegend(minValue, maxValue);
+    updateStates(color(minValue));
 } 
 
 function updateStates(defaultColor) {
