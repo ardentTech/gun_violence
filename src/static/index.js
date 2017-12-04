@@ -5,6 +5,11 @@ var Elm = require( "../elm/Main" ),
     color = d3.scaleSequential(d3.interpolateReds),
     data = {},
     filter = {"category": null, "year": null},
+    // @todo group these in an object, and don't use 'elem' in the name
+    legendAxis = null,
+    legendElem = null,
+    legendScale = null,
+    legendSvg = null,
     path = d3.geoPath(),
     rendered = false,
     svg = null,
@@ -119,23 +124,37 @@ function renderLegend() {
         offset += step;
     });
 
-    svg.append("svg:rect")
+    legendSvg = svg.append("svg:g")
+        .attr("transform", "translate(500, 10)");  // @todo don't hard-code 500
+
+    legendSvg.append("svg:rect")
         .attr("width", 300)
         .attr("height", 20)
         .style("fill", "url(#linear-gradient)");
 
-    // @todo axis ticks
+    legendScale = d3.scaleLinear()
+        .range([0, 300]);
+
+    legendAxis = d3.axisBottom()
+        .scale(legendScale);
+
+    legendElem = legendSvg.append("g")
+        .attr("class", "legend axis")
+        .attr("transform", "translate(0,20)");
 }
 
-// the color scale doesn't need to be re-rendered
+// @todo fix transition overflow x
 function updateLegend(min, max) {
+    legendScale.domain([min, max]);
+    legendElem
+        .transition()
+        .duration(TRANSITION_DURATION)
+        .call(legendAxis);
 }
 
 function update(state) {
+    if (!rendered) render(topo);
 
-    if (!rendered) {
-        render(topo);
-    }
     var parsed = JSON.parse(state),
         maxValue = 0,
         minValue = 0,
