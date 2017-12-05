@@ -1,263 +1,60 @@
-var TRANSITION_DURATION = 1000;
+const Elm = require( "../elm/Main" );
 
-var Elm = require( "../elm/Main" ),
-    app = Elm.Main.embed(document.getElementById("main")),
-    color = d3.scaleSequential(d3.interpolateReds),
-    data = {},
-    filter = {"category": null, "year": null},
-    // @todo group these in an object, and don't use 'elem' in the name
-    legendAxis = null,
-    legendElem = null,
-    legendScale = null,
-    legendSvg = null,
-    path = d3.geoPath(),
-    rendered = false,
-    svg = null,
-    topo = null;
 
-function initUI() {
-    var years = new Set();
-    for (var state in data) {
-        for (var year in data[state].stats) {
-            years.add(year);
-        } 
-    }
+class DataStore {
 
-    app.ports.categories.send(["Incidents", "Injured", "Killed", "Victims"]);
-    app.ports.years.send(Array.from(years)
-        .sort(function(a, b) {return b - a; })
-        .map(function(y) { return parseInt(y); }));
-}
-
-function main() {
-    d3.queue()
-        .defer(d3.json, "static/data/us-10m.v1.json")
-        .defer(d3.csv, "static/data/stats.csv")
-        .await(ready);
-
-    // messages from elm
-    app.ports.newState.subscribe(function(state) { update(state); });
-}
-
-function onStateClick(d) {
-    var stateName = nameFromFips(d.id);
-    app.ports.selectedState.send(JSON.stringify({
-        category: filter.category,
-        name: stateName,
-        value: data[stateName].value,
-        year: filter.year
-    }));
-}
-
-// @todo indicate this only works with CSV
-function parseStats(stats) {
-    stats.forEach(function(s) {
-        var year = s["Incident Date"].split(", ")[1],
-            injured = parseInt(s["# Injured"]),
-            killed = parseInt(s["# Killed"]);
-
-        if (!data.hasOwnProperty(s.State)) {
-            data[s.State] = {"stats": {}}; 
-        }
-
-        var state = data[s.State];
-
-        if (!state.stats.hasOwnProperty(year)) {
-            state.stats[year] = { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 };
-        }
-
-        state.stats[year].incidents++;
-        state.stats[year].injured += injured;
-        state.stats[year].killed += killed;
-        state.stats[year].victims += (injured + killed);
-    });
-}
-
-function ready(error, topo_, stats) {
-    if (error) throw error;
-
-    topo = topo_;
-    parseStats(stats);
-    initUI();
-}
-
-function render(topo) {
-    if (!rendered) {
-        svg = d3.select("svg");
-
-        svg.attr("width", document.getElementById("vis").clientWidth);
-        // @todo fix this
-        svg.attr("height", 600);
-
-        svg.append("svg:g")
-            .attr("class", "states")
-            .selectAll(".state")
-            .data(topojson.feature(topo, topo.objects.states).features)
-            .enter().append("svg:path")
-                .attr("d", path)
-                .attr("class", "state")
-                .attr("fill", function(d) { return color(0); })
-                .on("click", onStateClick)
-                .append("svg:title")
-                    .text(function(d) { return nameFromFips(d.id); });
-
-        renderLegend();
-        rendered = true;
+    // @todo should this manage all access?
+    load(ready) {
+        const sources = [[d3.json, "static/data/us-10m.v1.json"], [d3.csv, "static/data/stats.csv"]];
+        let queue = d3.queue();
+        sources.map((d) => { queue.defer(d[0], d[1]); });
+        queue.awaitAll(ready);
     }
 }
 
-function renderLegend() {
-    var defs = svg.append("svg:defs"),
-        gradient = defs.append("svg:linearGradient")
-            .attr("id", "linear-gradient")
-            .attr("x1", "0%")
-            .attr("y1", "0%")
-            .attr("x2", "100%")
-            .attr("y2", "0%"),
-        min = 0, max = 50, offset = 0, step = 100 / max;
 
-    color.domain([min, max]);
-    d3.range(min, max).forEach(function(i) {
-        gradient.append("svg:stop")
-            .attr("offset", offset + "%")
-            .attr("stop-color", "" + color(i));
-        offset += step;
-    });
+class Vis {
 
-    legendSvg = svg.append("svg:g")
-        .attr("transform", "translate(500, 10)");  // @todo don't hard-code 500
-
-    legendSvg.append("svg:rect")
-        .attr("width", 300)
-        .attr("height", 20)
-        .style("fill", "url(#linear-gradient)");
-
-    legendScale = d3.scaleLinear()
-        .range([0, 300]);
-
-    legendAxis = d3.axisBottom()
-        .scale(legendScale);
-
-    legendElem = legendSvg.append("g")
-        .attr("class", "legend axis")
-        .attr("transform", "translate(0,20)");
-}
-
-// @todo fix transition overflow x
-function updateLegend(min, max) {
-    legendScale.domain([min, max]);
-    legendElem
-        .transition()
-        .duration(TRANSITION_DURATION)
-        .call(legendAxis);
-}
-
-function update(state) {
-    if (!rendered) render(topo);
-
-    var parsed = JSON.parse(state),
-        maxValue = 0,
-        minValue = 0,
-        state = null,
-        value = 0;
-
-    filter.category = parsed.category.toLowerCase();
-    filter.year = parsed.year;
-
-    for (var k in data) {
-        state = data[k];
-        value = 0;
-
-        if (state.stats.hasOwnProperty(filter.year)) {
-            value += state.stats[filter.year][filter.category];
-        }
-
-        if (value > maxValue) maxValue = value;
-        if (value < minValue) minValue = value;
-        state.value = value;
+    parseData(error, topo, stats) {
+        if (error) throw error;
+        console.log("Vis.parseData");
     }
 
-    color.domain([minValue, maxValue]);
-    updateLegend(minValue, maxValue);
-    updateStates(color(minValue));
-} 
-
-function updateStates(defaultColor) {
-    svg.selectAll(".state")
-        .transition()
-        .duration(TRANSITION_DURATION)
-        .style("fill", function(d) {
-            var name = nameFromFips(d.id);
-            return data.hasOwnProperty(name) ? color(data[name].value) : defaultColor;
-        })
-        .select("title")
-            .text(function(d) {
-                var name = nameFromFips(d.id);
-                return data.hasOwnProperty(name) ? name + " : " + data[name].value : name;
-            });
+    update(state) {
+        console.log("Vis.update");
+    }
 }
 
-main();
 
+class App {
+    constructor(elmSelector) {
+        this.elmSelector = elmSelector;
+        this.elmApp = Elm.Main.embed(document.getElementById(this.elmSelector));
+        this.vis = new Vis();
+        this.dataStore = new DataStore();
+    }
 
-// @todo usstates.js
+    main() {
+        this.dataStore.load(this.vis.parseData);
+        this.elmApp.ports.newState.subscribe(this.newUIState);
 
-function nameFromFips(fips) {
-    return map_[fips];
+//        var years = new Set();
+//        for (var state in data) {
+//            for (var year in data[state].stats) {
+//                years.add(year);
+//            } 
+//        }
+//
+//        app.ports.categories.send(["Incidents", "Injured", "Killed", "Victims"]);
+//        app.ports.years.send(Array.from(years)
+//            .sort(function(a, b) {return b - a; })
+//            .map(function(y) { return parseInt(y); }));
+    }
+
+    newUIState(state) {
+        this.vis.update(state);
+    }
 }
 
-// PRIVATE
 
-var map_ = {
-    "01": "Alabama",
-    "02": "Alaska",
-    "04": "Arizona",
-    "05": "Arkansas",
-    "06": "California",
-    "08": "Colorado",
-    "09": "Connecticut",
-    "10": "Delaware",
-    "11": "District of Columbia",
-    "12": "Florida",
-    "13": "Georgia",
-    "15": "Hawaii",
-    "16": "Idaho",
-    "17": "Illinois",
-    "18": "Indiana",
-    "19": "Iowa",
-    "20": "Kansas",
-    "21": "Kentucky",
-    "22": "Louisiana",
-    "23": "Maine",
-    "24": "Maryland",
-    "25": "Massachusetts",
-    "26": "Michigan",
-    "27": "Minnesota",
-    "28": "Mississippi",
-    "29": "Missouri",
-    "30": "Montana",
-    "31": "Nebraska",
-    "32": "Nevada",
-    "33": "New Hampshire",
-    "34": "New Jersey",
-    "35": "New Mexico",
-    "36": "New York",
-    "37": "North Carolina",
-    "38": "North Dakota",
-    "39": "Ohio",
-    "40": "Oklahoma",
-    "41": "Oregon",
-    "42": "Pennsylvania",
-    "44": "Rhode Island",
-    "45": "South Carolina",
-    "46": "South Dakota",
-    "47": "Tennessee",
-    "48": "Texas",
-    "49": "Utah",
-    "50": "Vermont",
-    "51": "Virginia",
-    "53": "Washington",
-    "54": "West Virginia",
-    "55": "Wisconsin",
-    "56": "Wyoming"
-};
+new App("main").main();
