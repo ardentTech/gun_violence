@@ -1,40 +1,18 @@
 const Elm = require( "../elm/Main" );
 
 
-class DataStore {
-
-    constructor() {
-        this.data = {};
-        this.sourcesLoaded = 0;
-
-        this._loadedCallback = null;
-        this._sources = [];
-    }
-
-    set loadedCallback(func) { this._loadedCallback = func; }
-
-    set sources(s) { this._sources = s; }
-    
-    load() {
-        this._sources.forEach((s) => s.load((data) => this.loaded(data, s.name)));
-    }
-
-    loaded(data, name) {
-        this.data[name] = data;
-        this.sourcesLoaded++;
-        if (this.sourcesLoaded == this._sources.length) this._loadedCallback(data);
+class DataStoreManager {
+    static batchLoad(stores = [], callback) {
+        let loaded = 0;
+        stores.forEach((s) => s.load((data) => {
+            loaded++;
+            if (loaded == stores.length) callback();
+        }));
     }
 }
 
 
-class DataSource {
-
-    constructor (name, path, formatter) {
-        this.formatter = formatter;
-        this.name = name;
-        this.path = path;
-    }
-
+class DataStore {
     load(callback) {
         d3.queue().defer(this.formatter, this.path).await((error, data) => {
             if (error) throw error;
@@ -45,49 +23,69 @@ class DataSource {
 }
 
 
-class Vis {
+class UsStatesDataStore extends DataStore {
+    get formatter() { return d3.json; }
+    get path() { return "static/data/us-10m.v1.json"; }
+}
 
-    parseData(data) {
-        console.log("Vis.parseData");
-        console.log(data);
-    }
 
-    update(state) {
-        console.log("Vis.update");
+class GunViolenceDataStore extends DataStore {
+    get formatter() { return d3.csv; }
+    get path() { return "static/data/stats.csv"; }
+
+    get years() {
+        let years = new Set();
+        this.data.forEach((d) => {
+            years.add(parseInt(d["Incident Date"].split(", ")[1]));
+        });
+        return Array.from(years);
     }
+}
+
+
+class Vis {}
+
+
+class ElmApp {
+
+    constructor() { this.app = Elm.Main.embed(document.getElementById("main")); }
+
+    send(key, value) { this.app.ports[key].send(value); }
+
+    receive(key, callback) { this.app.ports[key].subscribe(callback); }
 }
 
 
 class App {
-    constructor(elmSelector) {
-        this.dataStore = new DataStore();
-        this.elmSelector = elmSelector;
-        this.elmApp = Elm.Main.embed(document.getElementById(this.elmSelector));
+    constructor() {
+        this.dataStores = {
+            "us.states": new UsStatesDataStore(),
+            "gun.violence": new GunViolenceDataStore()
+        };
+        this.elmApp = new ElmApp();
         this.vis = new Vis();
     }
 
-    dataSources() {
-        return [
-            new DataSource("us.states", "static/data/us-10m.v1.json", d3.json),
-            new DataSource("gun.violence", "static/data/stats.csv", d3.csv)
-        ];
-    }
-
     loadData() {
-        this.dataStore.sources = this.dataSources();
-        this.dataStore.loadedCallback = this.vis.parseData;
-        this.dataStore.load();
+        DataStoreManager.batchLoad(Object.values(this.dataStores), (data) => {
+            this.elmApp.send("years", this.dataStores["gun.violence"].years);
+            // @todo don't hard-code
+            this.elmApp.send("categories", ["Incidents", "Injured", "Killed", "Victims"]);
+        });
     }
 
     main() {
         this.loadData();
-//        this.elmApp.ports.newState.subscribe(this.newUIState);
+        this.elmApp.receive("newState", (state) => { this.update(state); });
     }
 
-//    newUIState(state) {
-//        this.vis.update(state);
-//    }
+    // @todo
+    update(state) {
+        console.log("App.update");
+        console.log(state);
+    }
+
 }
 
 
-new App("main").main();
+new App().main();
