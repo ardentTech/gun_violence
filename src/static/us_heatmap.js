@@ -13,9 +13,7 @@ export class UsHeatMap {
 
     set topoData(data) { this._topoData = data; }
 
-    containerWidth() {
-        return document.getElementById(this.parentId).clientWidth;
-    }
+    containerWidth() { return document.getElementById(this.parentId).clientWidth; }
 
     init() { d3.select(window).on("resize", () => this.resize()); }
 
@@ -30,7 +28,7 @@ export class UsHeatMap {
             .enter().append("svg:path")
                 .attr("d", this.path)
                 .attr("class", "state")
-                .attr("fill", (d) => { return this.color(0); })
+                .style("fill", (d) => { return this.color(0); })
                 .attr("id", (d) => { return d.id; });
 
         this.resize();
@@ -43,7 +41,14 @@ export class UsHeatMap {
         this.svg.attr("height", width * 0.75);
     }
 
-    update(state) {
+    update(stateValues) {
         if (!this.isRendered) this.render();
+
+        this.color.domain(d3.extent(Object.values(stateValues)));
+
+        d3.selectAll(".state")
+            .transition()
+            .duration(1000)
+            .style("fill", (d) => { return this.color(stateValues[d.id]); });
     }
 }

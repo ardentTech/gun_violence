@@ -1,14 +1,14 @@
-import { DataStores, UsTopoDataStore, GunViolenceDataStore } from "./data.js";
+import { DataStores, UsTopoDataStore } from "./data.js";
 import { ElmApp } from "./elm_app.js";
+import { GunViolenceDataStore } from "./gun_violence.js";
 import { UsHeatMap } from "./us_heatmap.js";
-import { UsStatesDataStore } from "./us_states.js";
 
 
+// @todo don't store as this.dataStores or write accessors
 class App {
     constructor() {
         this.dataStores = {
             "gun.violence": new GunViolenceDataStore(),
-            "us.states": new UsStatesDataStore(),
             "us.topo": new UsTopoDataStore()
         };
         this.elmApp = new ElmApp();
@@ -17,18 +17,22 @@ class App {
 
     loadData() {
         DataStores.batchLoad(Object.values(this.dataStores), () => {
+            this.vis.topoData = this.dataStores["us.topo"];
+
+            this.dataStores["gun.violence"].init();
             this.elmApp.send("years", this.dataStores["gun.violence"].years);
             this.elmApp.send("categories", this.dataStores["gun.violence"].categories);
-            this.vis.topoData = this.dataStores["us.topo"];
         });
     }
 
     main() {
         this.loadData();
         this.vis.init();
+
         this.elmApp.receive("newState", (state) => {
-            console.log(this.dataStores["gun.violence"].totalsByState);
-            this.vis.update(state);
+            let parsed = JSON.parse(state);
+            this.vis.update(
+                this.dataStores["gun.violence"].asValues(parsed.category, parsed.year));
         });
     }
 
