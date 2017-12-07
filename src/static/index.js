@@ -1,7 +1,7 @@
 //const Elm = require( "../elm/Main" );
 import * as Elm from "../elm/Main";
 import { DataStoreManager, DataStore, UsStatesDataStore, GunViolenceDataStore } from "./data.js";
-import { UsHeatMap } from "./vis.js";
+import { UsHeatMap } from "./us_heatmap.js";
 
 
 class ElmApp {
