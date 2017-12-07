@@ -1,41 +1,35 @@
-//const Elm = require( "../elm/Main" );
-import * as Elm from "../elm/Main";
-import { DataStoreManager, DataStore, UsStatesDataStore, GunViolenceDataStore } from "./data.js";
+import { DataStores, UsTopoDataStore, GunViolenceDataStore } from "./data.js";
+import { ElmApp } from "./elm_app.js";
 import { UsHeatMap } from "./us_heatmap.js";
-
-
-class ElmApp {
-
-    constructor() { this.app = Elm.Main.embed(document.getElementById("main")); }
-
-    send(key, value) { this.app.ports[key].send(value); }
-
-    receive(key, callback) { this.app.ports[key].subscribe(callback); }
-}
+import { UsStatesDataStore } from "./us_states.js";
 
 
 class App {
     constructor() {
         this.dataStores = {
+            "gun.violence": new GunViolenceDataStore(),
             "us.states": new UsStatesDataStore(),
-            "gun.violence": new GunViolenceDataStore()
+            "us.topo": new UsTopoDataStore()
         };
         this.elmApp = new ElmApp();
         this.vis = new UsHeatMap();
     }
 
     loadData() {
-        DataStoreManager.batchLoad(Object.values(this.dataStores), (data) => {
+        DataStores.batchLoad(Object.values(this.dataStores), () => {
             this.elmApp.send("years", this.dataStores["gun.violence"].years);
             this.elmApp.send("categories", this.dataStores["gun.violence"].categories);
-            this.vis.topoData = this.dataStores["us.states"];
+            this.vis.topoData = this.dataStores["us.topo"];
         });
     }
 
     main() {
         this.loadData();
         this.vis.init();
-        this.elmApp.receive("newState", (state) => { this.vis.update(state); });
+        this.elmApp.receive("newState", (state) => {
+            console.log(this.dataStores["gun.violence"].totalsByState);
+            this.vis.update(state);
+        });
     }
 
 }

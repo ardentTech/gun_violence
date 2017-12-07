@@ -1,3 +1,7 @@
+// @TODO
+// modes = county | state | country
+
+
 export class UsHeatMap {
     constructor() {
         this.color = d3.scaleSequential(d3.interpolateReds);
@@ -22,11 +26,12 @@ export class UsHeatMap {
         this.svg.append("svg:g")
             .attr("class", "states")
             .selectAll(".state")
-            .data(topojson.feature(this._topoData.data, this._topoData.states).features)
+            .data(topojson.feature(this._topoData.raw, this._topoData.states).features)
             .enter().append("svg:path")
                 .attr("d", this.path)
                 .attr("class", "state")
-                .attr("fill", (d) => { return this.color(0); });
+                .attr("fill", (d) => { return this.color(0); })
+                .attr("id", (d) => { return d.id; });
 
         this.resize();
         this.isRendered = true;
