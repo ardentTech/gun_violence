@@ -23,6 +23,8 @@ export class DataStore {
 export class UsStatesDataStore extends DataStore {
     get formatter() { return d3.json; }
     get path() { return "static/data/us-10m.v1.json"; }
+
+    get states() { return this.data.objects.states; }
 }
 
 

@@ -1,28 +1,24 @@
-export class Vis {
+export class UsHeatMap {
     constructor() {
         this.color = d3.scaleSequential(d3.interpolateReds);
         this.path = d3.geoPath();
         this.isRendered = false;
         this.svg = null;
     }
-    
-    parseData(dataStores) {
-        this.dataStores = dataStores;
-    }
+
+    set topoData(data) { this._topoData = data; }
+
+    init() { d3.select(window).on("resize", () => this.resize()); }
 
     render() {
         this.svg = d3.select("svg");
-
         this.svg.attr("width", document.getElementById("vis").clientWidth);
         this.svg.attr("height", 600);
 
         this.svg.append("svg:g")
             .attr("class", "states")
             .selectAll(".state")
-            .data(topojson.feature(
-                this.dataStores["us.states"].data,
-                this.dataStores["us.states"].data.objects.states
-            ).features)
+            .data(topojson.feature(this._topoData.data, this._topoData.states).features)
             .enter().append("svg:path")
                 .attr("d", this.path)
                 .attr("class", "state")
@@ -31,37 +27,12 @@ export class Vis {
         this.isRendered = true;
     }
 
+    resize() {
+        this.svg.attr("width", document.getElementById("vis").clientWidth);
+        // @todo height
+    }
+
     update(state) {
         if (!this.isRendered) this.render();
     }
 }
-
-
-// UPDATE
-//if (!rendered) render(topo);
-//
-//var parsed = JSON.parse(state),
-//    maxValue = 0,
-//    minValue = 0,
-//    state = null,
-//    value = 0;
-//
-//filter.category = parsed.category.toLowerCase();
-//filter.year = parsed.year;
-//
-//for (var k in data) {
-//    state = data[k];
-//    value = 0;
-//
-//    if (state.stats.hasOwnProperty(filter.year)) {
-//        value += state.stats[filter.year][filter.category];
-//    }
-//
-//    if (value > maxValue) maxValue = value;
-//    if (value < minValue) minValue = value;
-//    state.value = value;
-//}
-//
-//color.domain([minValue, maxValue]);
-//updateLegend(minValue, maxValue);
-//updateStates(color(minValue));

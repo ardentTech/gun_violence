@@ -1,7 +1,7 @@
 //const Elm = require( "../elm/Main" );
 import * as Elm from "../elm/Main";
 import { DataStoreManager, DataStore, UsStatesDataStore, GunViolenceDataStore } from "./data.js";
-import { Vis } from "./vis.js";
+import { UsHeatMap } from "./vis.js";
 
 
 class ElmApp {
@@ -21,19 +21,20 @@ class App {
             "gun.violence": new GunViolenceDataStore()
         };
         this.elmApp = new ElmApp();
-        this.vis = new Vis();
+        this.vis = new UsHeatMap();
     }
 
     loadData() {
         DataStoreManager.batchLoad(Object.values(this.dataStores), (data) => {
             this.elmApp.send("years", this.dataStores["gun.violence"].years);
             this.elmApp.send("categories", this.dataStores["gun.violence"].categories);
-            this.vis.parseData(this.dataStores);
+            this.vis.topoData = this.dataStores["us.states"];
         });
     }
 
     main() {
         this.loadData();
+        this.vis.init();
         this.elmApp.receive("newState", (state) => { this.vis.update(state); });
     }
 
