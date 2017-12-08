@@ -1,19 +1,39 @@
 #sidebar {
-    border-right: 1px solid #eee;
-    bottom: 0;
-    left: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
     padding: 20px;
-    position: fixed;
-    top: 0;
-    z-index: 1000;
 }
 
-#app-title, #filters {
+#app-title {
+    margin-bottom: 1rem;
+    text-align: center;
+}
+
+.col-form-label-sm { padding-bottom: 0; }
+
+#filters {
     border-bottom: 1px solid #eee;
-    margin-bottom: 20px;
-    padding-bottom: 9px;
+    margin-bottom: 1rem;
 }
 
 #state-details table { font-size: 0.75rem; }
+
+#data-attribution { font-size: 0.75rem; }
+#data-attribution a { color: #212529; }
+
+@media (min-width: 576px) {
+    #sidebar {
+        border-right: 1px solid #eee;
+        bottom: 0;
+        left: 0;
+        overflow-x: hidden;
+        overflow-y: auto;
+        position: fixed;
+        top: 0;
+        z-index: 1000;
+    }
+
+    #app-title {
+        margin-bottom: 3rem;
+    }
+
+    .col-form-label-sm { padding-bottom: calc(.25rem + 1px); }
+}
