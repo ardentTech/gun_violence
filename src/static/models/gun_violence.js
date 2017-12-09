@@ -1,8 +1,8 @@
-import { DataStore } from "./data.js";
-import { UsStates } from "./us_states.js";
+import { Model } from "../models.js";
+import { UsStates } from "../us_states.js";
 
 
-export class GunViolenceDataStore extends DataStore {
+export class GunViolence extends Model {
 
     constructor() {
         super();
@@ -20,7 +20,7 @@ export class GunViolenceDataStore extends DataStore {
 
     get years() { return Array.from(this._years); }
 
-    init() {
+    parse() {
         UsStates.names.forEach((n) => this._stateTotals[n] = {
             2017: { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 },
             2016: { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 },

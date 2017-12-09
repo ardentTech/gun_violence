@@ -1,29 +1,26 @@
-import { DataStores, UsTopoDataStore } from "./data.js";
 import { ElmApp } from "./elm_app.js";
-import { GunViolenceDataStore } from "./gun_violence.js";
+import { GunViolence } from "./models/gun_violence.js";
+import { Models } from "./models.js";
+import { UsTopo } from "./models/us_topo.js";
 import { UsHeatMap } from "./us_heatmap.js";
 
 
 // @todo app-wide message bus
 class App {
     constructor() {
-        this.dataStores = {
-            "gun.violence": new GunViolenceDataStore(),
-            "us.topo": new UsTopoDataStore()
-        };
-        this.gunViolenceData = new GunViolenceDataStore();
-        this.usTopo = new UsTopoDataStore();
+        this.models = new Models();
         this.elmApp = new ElmApp();
         this.vis = new UsHeatMap();
+        this.gunViolence = new GunViolence();
+        this.usTopo = new UsTopo();
     }
 
     loadData() {
-        DataStores.batchLoad(Object.values(this.dataStores), () => {
-            this.vis.topoData = this.dataStores["us.topo"];
-
-            this.dataStores["gun.violence"].init();
-            this.elmApp.send("years", this.dataStores["gun.violence"].years);
-            this.elmApp.send("categories", this.dataStores["gun.violence"].categories);
+        this.models.add(this.gunViolence, this.usTopo).load(() => {
+            this.vis.topoData = this.usTopo;
+            this.gunViolence.parse();
+            this.elmApp.send("years", this.gunViolence.years);
+            this.elmApp.send("categories", this.gunViolence.categories);
         });
     }
 
@@ -34,7 +31,7 @@ class App {
         this.elmApp.receive("newState", (state) => {
             let parsed = JSON.parse(state);
             this.vis.update(
-                this.dataStores["gun.violence"].asValues(parsed.category, parsed.year));
+                this.gunViolence.asValues(parsed.category, parsed.year));
         });
     }
 

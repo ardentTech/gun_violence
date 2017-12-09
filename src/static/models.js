@@ -1,12 +1,18 @@
 export class Models {
 
-    constructor() { this.models = { loaded: [], unloaded: [] }; }
+    constructor() {
+        this.models = { loaded: [], unloaded: [] };
+    }
 
-    set add(model) { this.models.unloaded.push(model); }
+    add() {
+        Array.prototype.slice.call(arguments).forEach((a) => this.models.unloaded.push(a));
+        return this;
+    }
 
     load(callback) {
         this.models.unloaded.forEach((model, i) => model.load((data) => {
             this.models.loaded.push(this.models.unloaded.slice(i)[0]);
+            // @todo ensure `callback` is a func
             if (this.models.loaded.length === this.models.unloaded.length) callback();
         }));
     }
