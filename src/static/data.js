@@ -1,3 +1,5 @@
+// @todo use singletons
+
 export class DataStores {
     static batchLoad(stores = [], callback) {
         let loaded = 0;

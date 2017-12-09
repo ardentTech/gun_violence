@@ -1,10 +1,13 @@
 export class UsStates {
+
     static get names() { return Object.values(fipsToName); }
+
     static fipsFromName(name) {
         return Object.entries(fipsToName).find((kv) => {
             return kv[1] === name;
         })[0];
     }
+    static nameFor(fips) { return fipsToName[fips]; }
 }
 
 

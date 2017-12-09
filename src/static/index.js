@@ -4,13 +4,15 @@ import { GunViolenceDataStore } from "./gun_violence.js";
 import { UsHeatMap } from "./us_heatmap.js";
 
 
-// @todo don't store as this.dataStores or write accessors
+// @todo app-wide message bus
 class App {
     constructor() {
         this.dataStores = {
             "gun.violence": new GunViolenceDataStore(),
             "us.topo": new UsTopoDataStore()
         };
+        this.gunViolenceData = new GunViolenceDataStore();
+        this.usTopo = new UsTopoDataStore();
         this.elmApp = new ElmApp();
         this.vis = new UsHeatMap();
     }

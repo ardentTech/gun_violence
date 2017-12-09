@@ -1,7 +1,7 @@
-// @TODO
-// modes = county | state | country
+import { UsStates } from "./us_states.js";
 
 
+// @todo rename to UsStateHeatMap with UsHeatMap base class
 export class UsHeatMap {
     constructor() {
         this.color = d3.scaleSequential(d3.interpolateReds);
@@ -17,6 +17,11 @@ export class UsHeatMap {
 
     init() { d3.select(window).on("resize", () => this.resize()); }
 
+    onStateClick(d) {
+        console.log(UsStates.nameFor(d.id));
+        // @todo send message
+    }
+
     render() {
         this.svg = d3.select("svg");
         this.svg.attr("width", "100%");
@@ -28,8 +33,9 @@ export class UsHeatMap {
             .enter().append("svg:path")
                 .attr("d", this.path)
                 .attr("class", "state")
-                .style("fill", (d) => { return this.color(0); })
-                .attr("id", (d) => { return d.id; });
+                .attr("id", (d) => { return d.id; })
+                .on("click", this.onStateClick)
+                .style("fill", (d) => { return this.color(0); });
 
         this.resize();
         this.isRendered = true;
