@@ -32,7 +32,9 @@ class App {
 
         this.elmApp.receive("newState", (state) => {
             let parsed = JSON.parse(state);
-            this.vis.update(this.gunViolence.asValues(parsed.category, parsed.year));
+            if (parsed.category && parsed.year) {
+                this.vis.update(this.gunViolence.asValues(parsed.category, parsed.year));
+            }
         });
     }
 

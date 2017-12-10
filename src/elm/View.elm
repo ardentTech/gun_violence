@@ -35,7 +35,7 @@ categories model =
 dataAttribution : Html Msg
 dataAttribution =
   div [ id "data-attribution" ] [
-    span [] [ text "* Data from the " ],
+    span [] [ text "* Data from " ],
     a [ href "http://www.gunviolencearchive.org" ] [ text "Gun Violence Archive" ]]
 
 

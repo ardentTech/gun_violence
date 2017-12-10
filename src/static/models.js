@@ -1,8 +1,15 @@
 export class ModelManager {
 
+    constructor() {
+        this.modelsLoaded = 0;
+    }
+
     loadBatch(models, callback) {
+        this.modelsLoaded = 0;
+
         models.forEach((model, i) => model.load((data) => {
-            if ((i + 1) === models.length) callback();
+            this.modelsLoaded++;
+            if (this.modelsLoaded == models.length) callback();
         }));
     }
 }

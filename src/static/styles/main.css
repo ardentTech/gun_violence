@@ -21,6 +21,10 @@
 
 #vis { margin-top: 1rem; }
 
+#legend path.domain,
+#legend .tick line { display: none; }
+#legend .tick text { fill: #212529; }
+
 @media (min-width: 576px) {
     #sidebar {
         border-right: 1px solid #eee;
