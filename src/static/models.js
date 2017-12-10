@@ -1,18 +1,8 @@
-export class Models {
+export class ModelManager {
 
-    constructor() {
-        this.models = { loaded: [], unloaded: [] };
-    }
-
-    add() {
-        Array.prototype.slice.call(arguments).forEach((a) => this.models.unloaded.push(a));
-        return this;
-    }
-
-    load(callback) {
-        this.models.unloaded.forEach((model, i) => model.load((data) => {
-            this.models.loaded.push(this.models.unloaded.slice(i)[0]);
-            if (this.models.loaded.length === this.models.unloaded.length) callback();
+    loadBatch(models, callback) {
+        models.forEach((model, i) => model.load((data) => {
+            if ((i + 1) === models.length) callback();
         }));
     }
 }

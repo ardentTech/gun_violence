@@ -19,6 +19,8 @@
 #data-attribution { font-size: 0.75rem; }
 #data-attribution a { color: #212529; }
 
+#vis { margin-top: 1rem; }
+
 @media (min-width: 576px) {
     #sidebar {
         border-right: 1px solid #eee;
