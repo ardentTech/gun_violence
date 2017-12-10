@@ -1,8 +1,7 @@
 import { UsStates } from "./us_states.js";
 
 
-// @todo rename to UsStateHeatMap with UsHeatMap base class
-export class UsHeatMap {
+export class UsStatesHeatMap {
     constructor() {
         this.color = d3.scaleSequential(d3.interpolateReds);
         this.isRendered = false;

@@ -2,7 +2,7 @@ import { ElmApp } from "./elm_app.js";
 import { GunViolence } from "./models/gun_violence.js";
 import { Models } from "./models.js";
 import { UsTopo } from "./models/us_topo.js";
-import { UsHeatMap } from "./us_heatmap.js";
+import { UsStatesHeatMap } from "./us_states_heat_map.js";
 
 
 // @todo app-wide message bus
@@ -10,7 +10,7 @@ class App {
     constructor() {
         this.models = new Models();
         this.elmApp = new ElmApp();
-        this.vis = new UsHeatMap();
+        this.vis = new UsStatesHeatMap();
         this.gunViolence = new GunViolence();
         this.usTopo = new UsTopo();
     }
@@ -30,8 +30,7 @@ class App {
 
         this.elmApp.receive("newState", (state) => {
             let parsed = JSON.parse(state);
-            this.vis.update(
-                this.gunViolence.asValues(parsed.category, parsed.year));
+            this.vis.update(this.gunViolence.asValues(parsed.category, parsed.year));
         });
     }
 

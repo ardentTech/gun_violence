@@ -12,7 +12,6 @@ export class Models {
     load(callback) {
         this.models.unloaded.forEach((model, i) => model.load((data) => {
             this.models.loaded.push(this.models.unloaded.slice(i)[0]);
-            // @todo ensure `callback` is a func
             if (this.models.loaded.length === this.models.unloaded.length) callback();
         }));
     }
