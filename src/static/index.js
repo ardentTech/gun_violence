@@ -5,12 +5,11 @@ import { UsTopo } from "./models/us_topo.js";
 import { UsStatesHeatMap } from "./us_states_heat_map.js";
 
 
-// @todo app-wide message bus
 class App {
     constructor() {
         this.modelManager = new ModelManager();
         this.elmApp = new ElmApp();
-        this.vis = new UsStatesHeatMap();
+        this.vis = new UsStatesHeatMap({ parentNode: "vis" });
         this.gunViolence = new GunViolence();
         this.usTopo = new UsTopo();
     }

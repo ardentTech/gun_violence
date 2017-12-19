@@ -1,14 +1,15 @@
 import { UsStates } from "./us_states.js";
+import MessageBus from "./message_bus.js";
 
 
 const TRANSITION_DURATION = 1000;
 
 
 export class UsStatesHeatMap {
-    constructor() {
+    constructor(settings) {
         this.color = d3.scaleSequential(d3.interpolateReds);
         this.isRendered = false;
-        this.parentId = "vis";
+        this.parentId = settings.parentNode;
         this.path = d3.geoPath();
         this.svg = null;
         this.legendAxisSvg = null;
@@ -24,8 +25,7 @@ export class UsStatesHeatMap {
     init() { d3.select(window).on("resize", () => this.resize()); }
 
     onStateClick(d) {
-        console.log(UsStates.nameFor(d.id));
-        // @todo send message
+        MessageBus.broadcast("state:click", UsStates.nameFor(d.id));
     }
 
     render() {
