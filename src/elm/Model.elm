@@ -14,12 +14,7 @@ type alias Model = {
 }
 
 
-type alias SelectedState = {
-  category : String,
-  name : String,
-  value : Int,
-  year : Int
-}
+type alias SelectedState = { name : String }
 
 
 init : Model

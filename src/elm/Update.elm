@@ -45,8 +45,5 @@ update msg model =
 
 
 selectedStateDecoder : Decoder SelectedState
-selectedStateDecoder = map4 SelectedState
-  (field "category" string)
+selectedStateDecoder = map SelectedState
   (field "name" string)
-  (field "value" int)
-  (field "year" int)
