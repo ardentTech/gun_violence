@@ -1,3 +1,4 @@
+import MessageBus from "../message_bus.js";
 import { Model } from "../models.js";
 import { UsStates } from "../us_states.js";
 
@@ -33,7 +34,7 @@ export class GunViolence extends Model {
                 state = this._stateTotals[d.State];
 
             let stateYear = state[year],
-                injured = parseInt(d["# Injured"]),
+                injured  = parseInt(d["# Injured"]),
                 killed = parseInt(d["# Killed"]);
 
             stateYear.incidents++;
@@ -43,6 +44,9 @@ export class GunViolence extends Model {
 
             this._years.add(year);
         });
+
+        MessageBus.broadcast("categories:parsed", this.categories);
+        MessageBus.broadcast("years:parsed", this.years);
     }
 
     rowYear(row) { return parseInt(row["Incident Date"].split(", ")[1]); }

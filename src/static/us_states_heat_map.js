@@ -25,7 +25,7 @@ export class UsStatesHeatMap {
     containerWidth() { return document.getElementById(this.parentId).clientWidth; }
 
     onStateClick(d) {
-        MessageBus.broadcast("state:click", UsStates.nameFor(d.id));
+        MessageBus.broadcast("state:clicked", UsStates.nameFor(d.id));
     }
 
     render() {

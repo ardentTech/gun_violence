@@ -2,16 +2,25 @@ import * as Elm from "../elm/Main";
 import MessageBus from "./message_bus.js";
 
 
-export class ElmApp {
+class ElmApp {
 
     constructor() {
         this.app = Elm.Main.embed(document.getElementById("main"));
         this.messageBus = MessageBus;
 
-        this.messageBus.subscribe("state:click", "elm-app", (name) => this.onStateClick(name));
+        this.messageBus.subscribe(
+            "state:clicked", "elm-app", (payload) => this.onStateClick(payload));
+        this.messageBus.subscribe(
+            "categories:parsed", "elm-app", (payload) => this.onCategoriesParsed(payload));
+        this.messageBus.subscribe(
+            "years:parsed", "elm-app", (payload) => this.onYearsParsed(payload));
     }
 
-    onStateClick(name) { this.send("selectedState", name); }
+    onCategoriesParsed(payload) { this.send("categoriesInit", payload); }
+
+    onStateClick(payload) { this.send("selectedState", payload); }
+
+    onYearsParsed(payload) { this.send("yearsInit", payload); }
 
     send(key, value) { this.app.ports[key].send(value); }
 
@@ -19,4 +28,4 @@ export class ElmApp {
 }
 
 
-// @todo export default new ElmApp();
+export default new ElmApp();

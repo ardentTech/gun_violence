@@ -1,17 +1,17 @@
-port module D3 exposing (categories, newState, selectedState, update, years)
+port module D3 exposing (categoriesInit, newState, selectedState, update, yearsInit)
 
 import Json.Encode exposing (..)
 
 import Model exposing (..)
 
 
-port categories : (List String -> msg) -> Sub msg
+port categoriesInit : (List String -> msg) -> Sub msg
 
 port newState : String -> Cmd msg
 
 port selectedState : (String -> msg) -> Sub msg
 
-port years : (List Year -> msg) -> Sub msg
+port yearsInit : (List Year -> msg) -> Sub msg
 
 
 update : Model -> Cmd msg
