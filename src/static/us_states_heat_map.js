@@ -16,13 +16,13 @@ export class UsStatesHeatMap {
         this.legendScale = d3.scaleLinear();
         this.legendSvg = null;
         this.legendAxis = d3.axisBottom().scale(this.legendScale);
+
+        d3.select(window).on("resize", () => this.resize());
     }
 
     set topoData(data) { this._topoData = data; }
 
     containerWidth() { return document.getElementById(this.parentId).clientWidth; }
-
-    init() { d3.select(window).on("resize", () => this.resize()); }
 
     onStateClick(d) {
         MessageBus.broadcast("state:click", UsStates.nameFor(d.id));

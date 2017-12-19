@@ -1,4 +1,3 @@
-// @todo use a singleton
 export class UsStates {
 
     static get names() { return Object.values(fipsToName); }

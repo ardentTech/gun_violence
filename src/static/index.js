@@ -27,7 +27,6 @@ class App {
 
     main() {
         this.loadData();
-        this.vis.init();
 
         this.elmApp.receive("newState", (state) => {
             let parsed = JSON.parse(state);
