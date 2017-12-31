@@ -43,16 +43,26 @@ dataAttribution =
 
 details : Model -> Html Msg
 details model =
-  let
-    stateName = case model.selectedState of
-      Just s -> s.name
-      _ -> ""
-  in
-    div [] [
-      h2 [] [ text stateName ],
-      table [] []
+  case model.selectedState of
+    Just s -> div [] [
+      h2 [] [ text s.name ],
+      incidentTable s.incidents
     ]
+    _ -> div [] []
 
+
+incidentTable : List Incident -> Html Msg
+incidentTable incidents =
+  let
+    headers = ["Address", "City or County", "Date", "# Killed", "# Injured"]
+    headerCells = List.map (\t -> th [] [ text t ]) headers
+    incidentRow i = tr [] <| List.map (\v -> td [] [ text v ]) [
+      i.address, i.cityCounty, i.date, i.killed, i.injured ]
+  in
+    table [ class "table table-sm" ] [
+      thead [] [ tr [] headerCells ],
+      tbody [] <| List.map incidentRow incidents
+    ]
 
 toSelect : List a -> Maybe a -> String -> (String -> Msg) -> (a -> String) -> Html Msg
 toSelect items selectedItem label_ msg toStr =

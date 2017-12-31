@@ -25,8 +25,10 @@ export class UsStatesHeatMap {
     containerWidth() { return document.getElementById(this.parentId).clientWidth; }
 
     onStateClick(d) {
-        MessageBus.broadcast("state:clicked",
-            JSON.stringify({"name": UsStates.nameFor(d.id)}));
+        MessageBus.broadcast("state:clicked", {
+            "fips": d.id,
+            "name": UsStates.nameFor(d.id)
+        });
     }
 
     render() {

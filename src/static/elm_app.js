@@ -8,8 +8,8 @@ class ElmApp {
         this.app = Elm.Main.embed(document.getElementById("main"));
         this.messageBus = MessageBus;
 
-        this.messageBus.subscribe(
-            "state:clicked", "elm-app", (payload) => this.onStateClick(payload));
+//        this.messageBus.subscribe(
+//            "state:clicked", "elm-app", (payload) => this.onStateClick(payload));
         this.messageBus.subscribe(
             "categories:parsed", "elm-app", (payload) => this.onCategoriesParsed(payload));
         this.messageBus.subscribe(
@@ -18,7 +18,9 @@ class ElmApp {
 
     onCategoriesParsed(payload) { this.send("categoriesInit", payload); }
 
-    onStateClick(payload) { this.send("selectedState", payload); }
+//    onStateClick(payload) {
+//        console.log(JSON.stringify(payload));
+//        this.send("selectedState", JSON.stringify(payload)); }
 
     onYearsParsed(payload) { this.send("yearsInit", payload); }
 

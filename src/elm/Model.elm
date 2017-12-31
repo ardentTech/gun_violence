@@ -14,7 +14,19 @@ type alias Model = {
 }
 
 
-type alias SelectedState = { name : String }
+type alias SelectedState = {
+  fips : String,
+  incidents : List Incident,
+  name : String }
+
+
+type alias Incident = {
+  address : String,
+  cityCounty : String,
+  date : String,
+  injured : String,
+  killed : String
+}
 
 
 init : Model

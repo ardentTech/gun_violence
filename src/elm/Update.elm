@@ -4,7 +4,7 @@ import Json.Decode exposing (..)
 
 import D3
 import Message exposing (Msg(..))
-import Model exposing (Model, SelectedState)
+import Model exposing (..)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -29,7 +29,12 @@ update msg model =
       let
         res = case decodeString selectedStateDecoder payload of
           Ok v -> Just v
-          _ -> Nothing
+          Err e ->
+            let
+              msg = toString e
+            in
+              Debug.log msg
+              Nothing
       in
         ({ model | selectedState = res }, Cmd.none )
     SelectYear year ->
@@ -45,5 +50,16 @@ update msg model =
 
 
 selectedStateDecoder : Decoder SelectedState
-selectedStateDecoder = map SelectedState
+selectedStateDecoder = map3 SelectedState
+  (field "fips" string)
+  (field "incidents" (list incidentDecoder))
   (field "name" string)
+
+
+incidentDecoder : Decoder Incident
+incidentDecoder = map5 Incident
+  (field "Address" string)
+  (field "City Or County" string)
+  (field "Incident Date" string)
+  (field "# Injured" string)
+  (field "# Killed" string)
