@@ -11,23 +11,18 @@ import Message exposing (Msg(SelectCategory, SelectYear))
 
 view : Model -> Html Msg
 view model =
-  let
-    stateName = case model.selectedState of
-      Just s -> s.name
-      _ -> ""
-  in
-    div [ class "container-fluid" ] [
-      div [ class "row" ] [
-        div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
-          h4 [ id "app-title" ] [ text "US Gun Violence" ],
-          Html.form [ id "filters" ] [ categories model, years model ],
-          dataAttribution
-        ],
-        div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []],
-        div [ class "col-sm-9 col-md-9 ml-sm-auto", id "details" ] [
-          h2 [] [ text stateName ]
-        ]
-      ] 
+  div [ class "container-fluid" ] [
+    div [ class "row" ] [
+      div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
+        h4 [ id "app-title" ] [ text "US Gun Violence" ],
+        Html.form [ id "filters" ] [ categories model, years model ],
+        dataAttribution
+      ],
+      div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []],
+      div [ class "col-sm-9 col-md-9 ml-sm-auto", id "details" ] [
+        details model
+      ]
+    ] 
   ]
 
 
@@ -44,6 +39,19 @@ dataAttribution =
   div [ id "data-attribution" ] [
     span [] [ text "* Data from " ],
     a [ href "http://www.gunviolencearchive.org" ] [ text "Gun Violence Archive" ]]
+
+
+details : Model -> Html Msg
+details model =
+  let
+    stateName = case model.selectedState of
+      Just s -> s.name
+      _ -> ""
+  in
+    div [] [
+      h2 [] [ text stateName ],
+      table [] []
+    ]
 
 
 toSelect : List a -> Maybe a -> String -> (String -> Msg) -> (a -> String) -> Html Msg
