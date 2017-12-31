@@ -11,15 +11,23 @@ import Message exposing (Msg(SelectCategory, SelectYear))
 
 view : Model -> Html Msg
 view model =
-  div [ class "container-fluid" ] [
-    div [ class "row" ] [
-      div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
-        h4 [ id "app-title" ] [ text "US Gun Violence" ],
-        Html.form [ id "filters" ] [ categories model, years model ],
-        dataAttribution
-      ],
-      div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []]
-    ] 
+  let
+    stateName = case model.selectedState of
+      Just s -> s.name
+      _ -> ""
+  in
+    div [ class "container-fluid" ] [
+      div [ class "row" ] [
+        div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
+          h4 [ id "app-title" ] [ text "US Gun Violence" ],
+          Html.form [ id "filters" ] [ categories model, years model ],
+          dataAttribution
+        ],
+        div [ class "col-sm-9 col-md-9 ml-sm-auto", id "vis" ] [ svg [] []],
+        div [ class "col-sm-9 col-md-9 ml-sm-auto", id "details" ] [
+          h2 [] [ text stateName ]
+        ]
+      ] 
   ]
 
 
