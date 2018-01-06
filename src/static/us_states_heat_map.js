@@ -26,7 +26,6 @@ export class UsStatesHeatMap {
 
     onStateClick(d) {
         MessageBus.broadcast("state:clicked", {
-            "fips": d.id,
             "name": UsStates.nameFor(d.id)
         });
     }

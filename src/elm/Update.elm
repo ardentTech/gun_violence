@@ -51,9 +51,9 @@ update msg model =
 
 selectedStateDecoder : Decoder SelectedState
 selectedStateDecoder = map3 SelectedState
-  (field "fips" string)
   (field "incidents" (list incidentDecoder))
   (field "name" string)
+  (field "year" int)
 
 
 incidentDecoder : Decoder Incident

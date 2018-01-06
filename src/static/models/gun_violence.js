@@ -5,6 +5,7 @@ import { UsStates } from "../us_states.js";
 
 export class GunViolence extends Model {
 
+    // @todo calculate total incidents here instead of D3 code
     constructor() {
         super();
         this._totalsByState = {}; // preload this in us_states.js?
@@ -74,15 +75,8 @@ export class GunViolence extends Model {
 
     rowYear(row) { return parseInt(row["Incident Date"].split(", ")[1]); }
 
-    stateIncidents(state) {
-        let stateData = this._stateData[state.name];
-        state.incidents = [];
-
-        Object.keys(stateData).forEach((year) => {
-            state.incidents = state.incidents.concat(
-                stateData[year].incidents);
-        });
-
-        return state;
+    stateIncidents(config) {
+        config.incidents = this._stateData[config.name][config.year].incidents;
+        return config;
     }
 }

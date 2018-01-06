@@ -15,9 +15,9 @@ type alias Model = {
 
 
 type alias SelectedState = {
-  fips : String,
   incidents : List Incident,
-  name : String }
+  name : String,
+  year : Year }
 
 
 type alias Incident = {

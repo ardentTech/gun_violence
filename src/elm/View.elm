@@ -14,7 +14,7 @@ view model =
   div [ class "container-fluid" ] [
     div [ class "row" ] [
       div [ class "col-sm-3 col-md-3 bg-light", id "sidebar" ] [
-        h4 [ id "app-title" ] [ text "US Gun Violence" ],
+        h4 [ id "app-title" ] [ text "US Mass Shootings" ],
         Html.form [ id "filters" ] [ categories model, years model ],
         dataAttribution
       ],
@@ -45,7 +45,7 @@ details : Model -> Html Msg
 details model =
   case model.selectedState of
     Just s -> div [] [
-      h2 [] [ text s.name ],
+      h2 [] [ text <| (s.name ++ " in " ++ (toString s.year)) ],
       incidentTable s.incidents
     ]
     _ -> div [] []
@@ -59,7 +59,7 @@ incidentTable incidents =
     incidentRow i = tr [] <| List.map (\v -> td [] [ text v ]) [
       i.address, i.cityCounty, i.date, i.killed, i.injured ]
   in
-    table [ class "table table-sm" ] [
+    table [ class "table table-sm table-striped" ] [
       thead [] [ tr [] headerCells ],
       tbody [] <| List.map incidentRow incidents
     ]

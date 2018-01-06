@@ -6,9 +6,13 @@ import { UsTopo } from "./models/us_topo.js";
 import { UsStatesHeatMap } from "./us_states_heat_map.js";
 
 
+// @todo receive msg from elm app when new year is chosen
+
+
 class App {
     constructor() {
         this.elmApp = ElmApp;
+        this.filter = { category : null, year : null };
         this.gunViolence = new GunViolence();
         this.messageBus = MessageBus;
         this.modelManager = new ModelManager();
@@ -32,17 +36,25 @@ class App {
         this.loadData();
 
         // @todo get a message from the bus instead of elm app directly
-        this.elmApp.receive("newState", (state) => {
+        // @todo update a filter object and emit a message
+        this.elmApp.receive("newFilter", (state) => {
             let parsed = JSON.parse(state);
-            if (parsed.category && parsed.year) {
+            // @todo learn how to unpack efficiently in ES6
+            this.filter.category = parsed.category;
+            this.filter.year = parsed.year;
+
+            // @todo if the filter year changes, trigger a `onStateClick`
+            if (this.filter.category && this.filter.year) {
                 this.vis.update(
                     this.gunViolence.categoryYearValues(
-                        parsed.category, parsed.year));
+                        this.filter.category, this.filter.year));
+
             }
         });
     }
 
     onStateClick(state) {
+        state.year = this.filter.year;
         this.elmApp.send(
             "selectedState",
             JSON.stringify(this.gunViolence.stateIncidents(state)));
