@@ -37,6 +37,9 @@ export class GunViolence extends Model {
     parse() {
         UsStates.names.forEach((n) => this._stateData[n] = {
             // @todo clean this up
+            2018: {
+                "incidents": [],
+                "totals": { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 }},
             2017: {
                 "incidents": [],
                 "totals": { "incidents": 0, "injured": 0, "killed": 0, "victims": 0 }},

@@ -96,7 +96,7 @@ export class UsStatesHeatMap {
 
         this.svg.attr("height", width * 0.75);
         d3.select("g.states").attr("transform", "scale(" + (width / 1000) + "),translate(0,40)");
-        this.legendSvg.attr("transform", "translate(" + (this.containerWidth() - 240) + ",0)");
+        this.legendSvg.attr("transform", "translate(" + (this.containerWidth() - 250) + ",0)");
     }
 
     update(data) {

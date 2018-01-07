@@ -41,9 +41,12 @@ class App {
             let parsed = JSON.parse(state);
             // @todo learn how to unpack efficiently in ES6
             this.filter.category = parsed.category;
-            this.filter.year = parsed.year;
-
+            if (this.filter.year != parsed.year) {
+                this.filter.year = parsed.year;
             // @todo if the filter year changes, trigger a `onStateClick`
+//                this.onStateClick();
+            }
+
             if (this.filter.category && this.filter.year) {
                 this.vis.update(
                     this.gunViolence.categoryYearValues(
